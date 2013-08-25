@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
@@ -11,6 +12,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 public class Game extends Canvas implements Runnable, KeyListener {
+	
 	// gamestates
 	private int gameState;
 	private final int GAME_TITLE = 0;
@@ -22,6 +24,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	private final int GAME_LOSE = 6;
 	private final int GAME_PAUSE = 7;
 	private final int GAME_RATING = 8;
+	
 	// menuStates
 	private Menu menu;
 	private int menuState;
@@ -31,15 +34,18 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	private final int MENU_RATEONE = 3;
 	private final int MENU_RATETWO = 4;
 	private final int MENU_RATETHREE = 5;
+	
 	private boolean[] keyPressed = new boolean[8];
 	private final int KEY_LEFT = 0, KEY_RIGHT = 1, KEY_UP = 2, KEY_DOWN = 3,
 			KEY_Q = 4, KEY_ENTER = 5, KEY_BACKSPACE = 6, KEY_P = 7;
 	private KeyBoard keyboard = new KeyBoard();
+	
 	// Buffered Images
 	private BufferedImage Title;
 	private BufferedImage Menu;
 	private BufferedImage Control;
 	private BufferedImage spriteSheet;
+	
 	// in-Game screen variables
 	private Header header = new Header();
 	private int Score;
@@ -49,6 +55,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	private int rate = 0;
 	private double FinalRate = 0;
 	private int rateEntries = 0;
+	
 	// used for drawing items to the screen
 	private Graphics2D graphics;
 
@@ -101,6 +108,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		double delta = 0;
 		int frames = 0;
 		int updates = 0;
+		
+		ball = new Ball(300, 300, 50, 50, Color.red);
+		
 
 		long secondTimer = System.nanoTime();
 		while (running) {
@@ -113,13 +123,14 @@ public class Game extends Canvas implements Runnable, KeyListener {
 				updates++;
 			}
 			render();
-			frames++;
+			//frames++;
 
 			if (System.nanoTime() - secondTimer > 1000000000) {
-				this.frame.setTitle(updates + " ups  ||  " + frames + " fps");
-				secondTimer += 1000000000;
-				frames = 0;
-				updates = 0;
+				//this.frame.setTitle(updates + " ups  ||  " + frames + " fps");
+				//secondTimer += 1000000000;
+				//frames = 0;
+				//updates = 0;
+				this.frame.setTitle("Ascent");
 			}
 		}
 		System.exit(0);
@@ -307,12 +318,18 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		Rectangle2D iconBorder = new Rectangle2D.Double(0, 0, 173, 735);
 		Rectangle2D iconBackground2 = new Rectangle2D.Double(540, 2, 270, 731);
 		Rectangle2D iconBorder2 = new Rectangle2D.Double(537, 0, 270, 735);
+		Ellipse2D circ = new Ellipse2D.Double(ball.getX(),ball.getY(),ball.getWidth(),ball.getHeight());
+
 		graphics.setColor(Color.gray);
 		graphics.fill(iconBorder);
 		graphics.fill(iconBorder2);
 		graphics.setColor(Color.darkGray);
 		graphics.fill(iconBackground);
 		graphics.fill(iconBackground2);
+		
+		graphics.setColor(ball.getColor());
+		graphics.fill(circ);
+		
 		header.drawLevel(graphics, level);
 		header.drawLives(graphics, Lives);
 		header.drawScore(graphics, Score);
@@ -326,7 +343,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		header.drawLose(graphics);
 	}
 
-	// ///////////Keyboard Accessing Methods/////////////
+	// Keyboard Accessing Methods
 	public void keysFalse() {
 		keyPressed[KEY_UP] = false;
 		keyPressed[KEY_DOWN] = false;

@@ -65,5 +65,6 @@ public class Ball {
 		setY(y);
 		setWidth(width);
 		setHeight(height);
+		setColor(color);
 	}
 }
