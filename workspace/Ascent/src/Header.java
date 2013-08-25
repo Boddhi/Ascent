@@ -5,12 +5,74 @@ import java.awt.geom.Rectangle2D;
 
 
 public class Header {
-		public void drawLose(Graphics2D graphics){
-	    }
-		public void drawWin(Graphics2D graphics){
-	    }
-		public void drawPause(Graphics2D graphics){
-	    }
+	public void drawLose(Graphics2D graphics){
+		Rectangle2D textBackground=new Rectangle2D.Double(219,232,292, 146);
+		Rectangle2D textBackground2=new Rectangle2D.Double(222,235,286, 140);
+    	String text = "You Lose!";
+    	String text2 = "Press Back to Return";
+    	String text3 = "to Menu";
+    	graphics.setColor(Color.gray);
+		graphics.fill(textBackground);
+    	graphics.setColor(Color.darkGray);
+		graphics.fill(textBackground2);
+    	graphics.setColor(Color.red);
+    	Font arial2= new Font("Tekton Pro", Font.PLAIN, 25);
+    	Font arial= new Font("Tekton Pro", Font.PLAIN, 50);
+    	graphics.setFont(arial);
+    	graphics.drawString(text, 283  , 285);
+    	graphics.setFont(arial2);
+    	graphics.setColor(Color.orange);
+    	graphics.drawString(text2, 270  , 310);
+    	graphics.drawString(text3, 340, 335);
+    }
+	public void drawWin(Graphics2D graphics){
+		Rectangle2D textBackground=new Rectangle2D.Double(219,232,292, 146);
+		Rectangle2D textBackground2=new Rectangle2D.Double(222,235,286, 140);
+    	String text = "You Win!";
+    	String text2 = "Press Back to Return";
+    	String text3 = "to Menu";
+    	graphics.setColor(Color.gray);
+		graphics.fill(textBackground);
+    	graphics.setColor(Color.darkGray);
+		graphics.fill(textBackground2);
+    	graphics.setColor(Color.green);
+    	Font arial2= new Font("Tekton Pro", Font.PLAIN, 25);
+    	Font arial= new Font("Tekton Pro", Font.PLAIN, 50);
+    	graphics.setFont(arial);
+    	graphics.drawString(text, 283  , 285);
+    	graphics.setFont(arial2);
+    	graphics.setColor(Color.orange);
+    	graphics.drawString(text2, 270  , 310);
+    	graphics.drawString(text3, 340, 335);
+    }
+	public void drawPause(Graphics2D graphics){
+		Rectangle2D textBackground=new Rectangle2D.Double(219,232,292, 146);
+		Rectangle2D textBackground2=new Rectangle2D.Double(222,235,286, 140);
+    	String text = "Paused!";
+    	String text2 = "Press              to Resume";
+    	String text3 = "Press                          to";
+    	String text4 = "Return to Menu";
+    	String text5 = "Enter";
+    	String text6 = "BackSpace";
+    	graphics.setColor(Color.gray);
+		graphics.fill(textBackground);
+    	graphics.setColor(Color.darkGray);
+		graphics.fill(textBackground2);
+    	graphics.setColor(Color.orange);
+    	Font arial2= new Font("Tekton Pro", Font.PLAIN, 25);
+    	Font arial= new Font("Tekton Pro", Font.PLAIN, 50);
+    	graphics.setFont(arial);
+    	graphics.setColor(Color.white);
+    	graphics.drawString(text, 285  , 285);
+    	graphics.setColor(Color.orange);
+    	graphics.setFont(arial2);
+    	graphics.drawString(text2, 250  , 310);
+    	graphics.drawString(text3, 260, 335);
+    	graphics.drawString(text4, 290, 360);
+    	graphics.setColor(Color.red);
+    	graphics.drawString(text5, 315, 310);
+    	graphics.drawString(text6, 325, 335);
+    }
 	    public void drawScore(Graphics2D graphics, int Score){
 	    	String text = "Score:";
 	    	graphics.setColor(Color.white);

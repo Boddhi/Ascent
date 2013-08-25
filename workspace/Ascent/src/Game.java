@@ -51,11 +51,6 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	private int Score;
 	private int Lives;
 	private int level;
-	private int playNum = 100;
-	private int rate = 0;
-	private double FinalRate = 0;
-	private int rateEntries = 0;
-	
 	// used for drawing items to the screen
 	private Graphics2D graphics;
 
@@ -207,7 +202,6 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	public void updateMenuGameState() {
 		if (menuState == MENU_PLAY && keyPressed[KEY_ENTER]) {
 			gameState = GAME_START;
-			playNum++;
 		}
 		if (menuState == MENU_CONTROL && keyPressed[KEY_ENTER])
 			gameState = GAME_CONTROL;
@@ -279,6 +273,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
 			graphics.drawImage(Control, 0, 0, 980, 735, null);
 		} 
 		else if (gameState == GAME_START) {
+			Rectangle2D mapBackground = new Rectangle2D.Double(0, 0, 768, 735);
+			graphics.setColor(Color.black);
+			graphics.fill(mapBackground);
 			drawIconBar();
 		} 
 		else if (gameState == GAME_LOSE) {
