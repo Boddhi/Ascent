@@ -7,7 +7,7 @@ public class Ball {
 	private int height;
 	private Color color;
 	private int velX;
-	private int velY;
+	private int velY2test2;
 	private int flipVelX;
 	private int flipVelY;
 	public void setX(int x){
@@ -46,19 +46,19 @@ public class Ball {
 	public int getVelocityX(){
 		return this.velX;
 	}
-	public void setVelocityY(int velY){
-		this.velY=velY;
+	public void setVelocityY(int velY2test2){
+		this.velY2test2=velY2test2;
 	}
 	public int getVelocityY(){
-		return this.velY;
+		return this.velY2test2;
 	}
 	public int flipVelocityX(){
 		this.flipVelX=velX*-1;
 		return this.flipVelX;
 	}
 	public int flipVelocityY(){
-		this.velY = velY*-1;
-		return this.velY;
+		this.velY2test2 = velY2test2*-1;
+		return this.velY2test2;
 	}
 	public Ball(int x, int y, int width, int height, Color color){
 		setX(x);
