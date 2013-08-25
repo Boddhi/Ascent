@@ -16,8 +16,6 @@ public class aplusb {
 						counter++;
 			}
 			System.out.println(counter);
-
-			
 		}
 	}
 }
