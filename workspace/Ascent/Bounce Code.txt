@@ -1,0 +1,26 @@
+bounce physics
+only works for horizontal/vertical walls atm
+
+/* Don't need this right now
+double ballAngle = ball.getVelocityY() / ball.getVelocityX();
+if(ball.getVelocityY() == 0) ballAngle = 0;
+else if (ball.getVelocityX() == 0) ballAngle = 90;
+*/
+
+
+// There needs to be an ArrayList of walls
+
+double wallAngle = (wall.getY2() - wall.getY1()) / (wall.getX2() - wall.getX1());
+if(wall.getY2() == wall.getY1()) wallAngle = 0;
+else if (wall.getX2 == wall.getX1()) wallAngle = 90;
+
+for (i in Walls){
+  if(collision(walls[i],ball){
+    if(wallAngle = 0){
+      ball.setVelocityY(-ball.getVelocityY);
+    }
+    else if (wallAngle = 90){
+      ball.setVelocityX(-ball.getVelocityX);
+    }
+  }
+}
