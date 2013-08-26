@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 
 public class Header {
@@ -77,15 +78,15 @@ public class Header {
 	    	String text = "Score:";
 	    	graphics.setColor(Color.white);
 	    	graphics.setFont(new Font("Tekton Pro", Font.PLAIN, 30));
-	    	graphics.drawString(text,550  , 40); 
-	    	graphics.drawString(String.valueOf(Score),640,40);
+	    	graphics.drawString(text,30  , 120); 
+	    	graphics.drawString(String.valueOf(Score),120,120);
 	    }
 	    public void drawLives(Graphics2D graphics, int Lives) {
 	    	String text = "Lives:";
 	    	graphics.setColor(Color.white);
 	    	graphics.setFont(new Font("Tekton Pro", Font.PLAIN, 30));
-	    	graphics.drawString(text,670  , 40); 
-	    	graphics.drawString(String.valueOf(Lives),750,40);
+	    	graphics.drawString(text,30  , 80); 
+	    	graphics.drawString(String.valueOf(Lives),110,80);
 	    }
 	    public void drawLevel(Graphics2D graphics, int level) {
 	    	String text = "Level:";
@@ -93,5 +94,23 @@ public class Header {
 	    	graphics.setFont(new Font("Tekton Pro", Font.PLAIN, 30));
 	    	graphics.drawString(text,30  , 40); 
 	    	graphics.drawString(String.valueOf(level),110,40);
+	    }
+	    public void drawControls(Graphics2D graphics){
+	    	String text = "Q: Quit Game";
+	    	String text2= "P: Pause Game";
+	    	String text3= "Controls:";
+	    	String text4= "Use Mouse Keys";
+	    	String text5= "To Draw Reflectors";
+	    	graphics.setColor(Color.white);
+	    	graphics.setFont(new Font("Tekton Pro", Font.PLAIN, 30));
+	    	graphics.drawString(text,555  , 40); 
+	    	graphics.drawString(text2,555  , 80); 
+	    	graphics.drawString(text3,555  , 150); 
+	    	graphics.setFont(new Font("Tekton Pro", Font.PLAIN, 28));
+	    	graphics.drawString(text4,555  , 190); 
+	    	graphics.drawString(text5,555  , 225); 
+	    }
+	    public void drawLogo(BufferedImage Logo, Graphics2D graphics){
+	    	graphics.drawImage(Logo,30,250,27, 51,null);
 	    }
 }

@@ -41,10 +41,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	private KeyBoard keyboard = new KeyBoard();
 	
 	// Buffered Images
-	private BufferedImage Title;
+	private BufferedImage Logo;
 	private BufferedImage Menu;
 	private BufferedImage Control;
-	private BufferedImage spriteSheet;
 	
 	// in-Game screen variables
 	private Header header = new Header();
@@ -165,7 +164,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	public void loadImages() {
 		try {
 			Menu = ImageIO.read(new File("Ascent Menu.png"));
-			Control = ImageIO.read(new File("Ascemt Controls.png"));
+			Control = ImageIO.read(new File("Ascent Controls.png"));
+			Logo = ImageIO.read(new File("AscentLogo.png"));
 		} catch (IOException e) {
 		}
 	}
@@ -305,6 +305,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
 				keysFalse();
 			}
 		}
+		else if(gameState == GAME_QUIT){
+			System.exit(0);
+		}
 	}
 
 	public void drawGameMenu() {
@@ -330,6 +333,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		header.drawLevel(graphics, level);
 		header.drawLives(graphics, Lives);
 		header.drawScore(graphics, Score);
+		header.drawControls(graphics);
+		header.drawLogo(Logo, graphics);
 	}
 
 	public void drawWin() {
