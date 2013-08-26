@@ -10,13 +10,13 @@ else if (ball.getVelocityX() == 0) ballAngle = 90;
 
 // There needs to be an ArrayList of walls
 
-double wallAngle = (wall.getY2() - wall.getY1()) / (wall.getX2() - wall.getX1());
-if(wall.getY2() == wall.getY1()) wallAngle = 0;
-else if (wall.getX2 == wall.getX1()) wallAngle = 90;
-
 for (i in Walls){
+  double wallAngle = (wall[i].getY2() - wall[i].getY1()) / (wall[i].getX2() - wall[i].getX1());
+  if(wall[i].getY2() == wall[i].getY1()) wallAngle = 0;
+  else if (wall[i].getX2 == wall[i].getX1()) wallAngle = 90;
+
   if(collision(walls[i],ball){
-    ball.setVelocityX(Math.sin(ballAngle-wallAngle)*totalv);
-    ball.setVelocityY(Math.cos(ballAngle-wallAngle)*totalv);
+    ball.setVelocityX(Math.sin(Math.abs(ballAngle-wallAngle))*totalv);
+    ball.setVelocityY(Math.cos(Math.abs(ballAngle-wallAngle))*totalv);
   }
 }
