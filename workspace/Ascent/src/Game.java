@@ -47,6 +47,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	
 	// in-Game screen variables
 	private Header header = new Header();
+	public static int scroll;
 	private int Score;
 	private int Lives;
 	private int level;
@@ -65,86 +66,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	// variables for the thread
 	private Thread thread;
 	private boolean running;
-
-	public static void main(String[] args) {
-		Game game = new Game();
-		game.frame.setResizable(false);
-		game.frame.add(game); // game is a component because it extends Canvas
-		game.frame.pack();
-		game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		game.frame.setLocationRelativeTo(null);
-		game.frame.setVisible(true);
-		game.start();
-	}
-
-	public Game() {
-		this.setBackground(Color.black);
-		Dimension size = new Dimension(WIDTH, HEIGHT);
-		setPreferredSize(size);
-		frame = new JFrame();
-		this.setFocusable(true);
-		this.requestFocus();
-		addKeyListener(this);
-	}
-
-	// starts a new thread for the game
-	public synchronized void start() {
-		thread = new Thread(this, "Game");
-		running = true;
-		thread.start();
-	}
-
-	// main game loop
-	public void run() {
-		init();
-		long startTime = System.nanoTime();
-		double ns = 1000000000.0 / UPS;
-		double delta = 0;
-		int frames = 0;
-		int updates = 0;
-		
-		ball = new Ball(300, 300, 50, 50, Color.red);
-		
-
-		long secondTimer = System.nanoTime();
-		while (running) {
-			long now = System.nanoTime();
-			delta += (now - startTime) / ns;
-			startTime = now;
-			while (delta >= 1) {
-				update();
-				delta--;
-				updates++;
-			}
-			render();
-			//frames++;
-
-			if (System.nanoTime() - secondTimer > 1000000000) {
-				//this.frame.setTitle(updates + " ups  ||  " + frames + " fps");
-				//secondTimer += 1000000000;
-				//frames = 0;
-				//updates = 0;
-				this.frame.setTitle("Ascent");
-			}
-		}
-		System.exit(0);
-	}
-
-	public void render() {
-		BufferStrategy bs = getBufferStrategy(); // method from Canvas class
-
-		if (bs == null) {
-			createBufferStrategy(3); // creates it only for the first time the
-										// loop runs (trip buff)
-			return;
-		}
-
-		graphics = (Graphics2D) bs.getDrawGraphics();
-		draw();
-		graphics.dispose();
-		bs.show();
-	}
-
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// initialize game objects, load media(pics, music, etc)
 	public void init() {
 		gameState=GAME_START;
@@ -169,7 +92,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		} catch (IOException e) {
 		}
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// update game objects
 	public void update() {
 		if (gameState == GAME_TITLE) {
@@ -263,7 +187,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		if (keyPressed[KEY_P])
 			gameState = GAME_PAUSE;
 	}
-
+	
+	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// draw things to the screen
 	public void draw() {
 		if (gameState == GAME_MENU) {
@@ -344,7 +269,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	public void drawLose() {
 		header.drawLose(graphics);
 	}
-
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Keyboard Accessing Methods
 	public void keysFalse() {
 		keyPressed[KEY_UP] = false;
@@ -363,8 +289,88 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
 	public void keyTyped(KeyEvent e) {
 	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//methods required for the thread
+	public static void main(String[] args) {
+		Game game = new Game();
+		game.frame.setResizable(false);
+		game.frame.add(game); // game is a component because it extends Canvas
+		game.frame.pack();
+		game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		game.frame.setLocationRelativeTo(null);
+		game.frame.setVisible(true);
+		game.start();
+	}
 
-	// stops the game thread and quits
+	public Game() {
+		this.setBackground(Color.black);
+		Dimension size = new Dimension(WIDTH, HEIGHT);
+		setPreferredSize(size);
+		frame = new JFrame();
+		this.setFocusable(true);
+		this.requestFocus();
+		addKeyListener(this);
+	}
+
+	// starts a new thread for the game
+	public synchronized void start() {
+		thread = new Thread(this, "Game");
+		running = true;
+		thread.start();
+	}
+
+	// main game loop
+	public void run() {
+		init();
+		long startTime = System.nanoTime();
+		double ns = 1000000000.0 / UPS;
+		double delta = 0;
+		int frames = 0;
+		int updates = 0;
+		
+		ball = new Ball(300, 300, 50, 50, Color.red);
+		
+
+		long secondTimer = System.nanoTime();
+		while (running) {
+			long now = System.nanoTime();
+			delta += (now - startTime) / ns;
+			startTime = now;
+			while (delta >= 1) {
+				update();
+				delta--;
+				updates++;
+			}
+			render();
+			//frames++;
+
+			if (System.nanoTime() - secondTimer > 1000000000) {
+				//this.frame.setTitle(updates + " ups  ||  " + frames + " fps");
+				//secondTimer += 1000000000;
+				//frames = 0;
+				//updates = 0;
+				this.frame.setTitle("Ascent");
+			}
+		}
+		System.exit(0);
+	}
+
+	public void render() {
+		BufferStrategy bs = getBufferStrategy(); // method from Canvas class
+
+		if (bs == null) {
+			createBufferStrategy(3); // creates it only for the first time the
+										// loop runs (trip buff)
+			return;
+		}
+
+		graphics = (Graphics2D) bs.getDrawGraphics();
+		draw();
+		graphics.dispose();
+		bs.show();
+	}
+		// stops the game thread and quits
 	public synchronized void stop() {
 		running = false;
 		try {
