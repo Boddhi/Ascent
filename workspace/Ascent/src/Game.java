@@ -41,21 +41,15 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	private KeyBoard keyboard = new KeyBoard();
 	
 	// Buffered Images
-	private BufferedImage Title;
+	private BufferedImage Logo;
 	private BufferedImage Menu;
 	private BufferedImage Control;
-	private BufferedImage spriteSheet;
 	
 	// in-Game screen variables
 	private Header header = new Header();
 	private int Score;
 	private int Lives;
 	private int level;
-	private int playNum = 100;
-	private int rate = 0;
-	private double FinalRate = 0;
-	private int rateEntries = 0;
-	
 	// used for drawing items to the screen
 	private Graphics2D graphics;
 
@@ -170,7 +164,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	public void loadImages() {
 		try {
 			Menu = ImageIO.read(new File("Ascent Menu.png"));
-			Control = ImageIO.read(new File("Ascemt Controls.png"));
+			Control = ImageIO.read(new File("Ascent Controls.png"));
+			Logo = ImageIO.read(new File("AscentLogo.png"));
 		} catch (IOException e) {
 		}
 	}
@@ -207,7 +202,6 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	public void updateMenuGameState() {
 		if (menuState == MENU_PLAY && keyPressed[KEY_ENTER]) {
 			gameState = GAME_START;
-			playNum++;
 		}
 		if (menuState == MENU_CONTROL && keyPressed[KEY_ENTER])
 			gameState = GAME_CONTROL;
@@ -279,6 +273,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
 			graphics.drawImage(Control, 0, 0, 980, 735, null);
 		} 
 		else if (gameState == GAME_START) {
+			Rectangle2D mapBackground = new Rectangle2D.Double(0, 0, 768, 735);
+			graphics.setColor(Color.black);
+			graphics.fill(mapBackground);
 			drawIconBar();
 		} 
 		else if (gameState == GAME_LOSE) {
@@ -308,6 +305,9 @@ public class Game extends Canvas implements Runnable, KeyListener {
 				keysFalse();
 			}
 		}
+		else if(gameState == GAME_QUIT){
+			System.exit(0);
+		}
 	}
 
 	public void drawGameMenu() {
@@ -333,6 +333,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		header.drawLevel(graphics, level);
 		header.drawLives(graphics, Lives);
 		header.drawScore(graphics, Score);
+		header.drawControls(graphics);
+		header.drawLogo(Logo, graphics);
 	}
 
 	public void drawWin() {
