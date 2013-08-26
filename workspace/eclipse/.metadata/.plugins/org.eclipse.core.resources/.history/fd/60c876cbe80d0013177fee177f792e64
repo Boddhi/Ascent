@@ -1,0 +1,19 @@
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+
+
+public class MouseMotion implements MouseMotionListener{
+	
+	public void get(){
+		
+	}
+	
+	public void mouseDragged(MouseEvent e) {
+		
+	}
+	
+	public void mouseMoved(MouseEvent e) {
+		
+	}
+
+}
