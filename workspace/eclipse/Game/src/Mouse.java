@@ -8,11 +8,11 @@ public class Mouse implements MouseListener{
 	
 	public Reflector get(){
 		if (rReady){
-			Reflector r = new Reflector(x1, y1, x2, y2);
+			Reflector t = new Reflector(x1, y1, x2, y2);
 			rReady = false;
 			//System.out.println("ran" + Game.walls.size());
 			
-			return r;
+			return t;
 		}
 		return null;
 		

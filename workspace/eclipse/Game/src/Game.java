@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
@@ -59,7 +60,7 @@ public class Game extends Canvas implements Runnable {
 	
 	//Highscore Variables
 	static String playerName = "";
-	public static Vector<Reflector> walls;
+	public static ArrayList<Reflector> walls;
 	Vector<Score> TimeTrialHS;
 	Vector<Score> SurvivalHS;
 	static int rating = 0;
@@ -148,8 +149,9 @@ public class Game extends Canvas implements Runnable {
 			initWalls();
 		}
 			public void initWalls(){
-				walls = new Vector();
-				walls.add(new Reflector(0, 0, 0, 0));
+				walls = new ArrayList();
+				walls.add(new Reflector(50, 50, 0, 0));
+				walls.add(new Reflector(500,500,500,400));
 			}
 		
 		
@@ -213,9 +215,11 @@ public class Game extends Canvas implements Runnable {
 				Reflector r = m.get();
 				if (r!=null){
 					walls.add(r);
+					for(int i = 0; i < walls.size(); i++)
+						System.out.println(walls.get(i).getX1());
 				}
 				for (int i = 0; i<walls.size(); i++){
-					if (walls.elementAt(i).isOutOfBounds()){
+					if (walls.get(i).isOutOfBounds()){
 						walls.remove(i);
 					}
 				}
@@ -363,9 +367,10 @@ public class Game extends Canvas implements Runnable {
 			public void drawWalls(){
 				
 				for(int i = 0; i<walls.size(); i++){
+				//	System.out.println(i);
 					graphics.setColor(Color.cyan);
-					//System.out.println(t);//"ran" + i);
-					walls.elementAt(i).draw(graphics);
+				//	System.out.println(i);
+					walls.get(i).draw(graphics);
 				}
 			}
 		

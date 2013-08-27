@@ -3,7 +3,7 @@ import java.awt.geom.Line2D;
 
 
 public class Reflector { 
-	private static int x1, y1, x2, y2;
+	public int x1, y1, x2, y2;
 	
 	public Reflector(int x1, int y1, int x2, int y2){
 		this.x1 = x1;
@@ -11,17 +11,19 @@ public class Reflector {
 		this.x2 = x2;
 		this.y2 = y2;
 	}
-	public static boolean isOutOfBounds(){
+	
+	public boolean isOutOfBounds(){
 		if (y1>Game.HEIGHT-Game.t&&y2>Game.HEIGHT-Game.t){
 			return true;
 		}
 		return false;
 	}
-	public static Line2D getLine(){
+	
+	public Line2D getLine(){
 		Line2D.Double l = new Line2D.Double(x1, y1, x2, y2);
 		return l;
 	}
-	public static void draw(Graphics2D graphics  ){
+	public void draw(Graphics2D graphics  ){
 		graphics.drawLine(x1, y1, x2, y2);
 	}
 	
