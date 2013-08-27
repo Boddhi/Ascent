@@ -61,6 +61,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
 	// game updates per second
 	static final int UPS = 60;
+	
+	public static int t;
 
 	// variables for the thread
 	private Thread thread;
