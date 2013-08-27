@@ -51,6 +51,8 @@ public class Game extends Canvas implements Runnable {
 	static  int pausedBar_State = 0, pausedBar_Menu = 0, pausedBar_Instructions = 1, pausedBar_TimeTrial = 3, pausedBar_Survival = 4; 
 	static  int menu_State = 1, menu_Menu = 0, menu_Instructions = 1, menu_Highscores = 2, menu_TimeTrial = 3, menu_Survival = 4; 
 
+	//Brandon Stuff
+	Header header = new Header();
 	
 	//Menu Variables
 	BufferedImage menuBackgroundImg = null;
@@ -76,6 +78,7 @@ public class Game extends Canvas implements Runnable {
 	//----------------------------------------------------------------------------------------
 	// menu and gamestate changing methods
 	public void updateGameState(){
+	//	System.out.println(m.holding);
 		if (reset != -1 && reset != 5){
 			GAME_STATE = reset;
 			init();
@@ -95,6 +98,7 @@ public class Game extends Canvas implements Runnable {
 		else {
 			GAME_STATE = PAUSED_STATE;
 			PAUSED_STATE = -1;
+			m.clear();
 		}
 	}
 	
@@ -210,18 +214,17 @@ public class Game extends Canvas implements Runnable {
 			updateWalls();
 		}
 			public void updateWalls(){
-				Reflector r = m.get();
-				if (r!=null){
-					walls.add(r);
-					for(int i = 0; i < walls.size(); i++)
-						System.out.println(walls.get(i).getX1());
-				}
-				for (int i = 0; i<walls.size(); i++){
-					if (walls.get(i).isOutOfBounds()){
-						walls.remove(i);
+//				if(GAME_STATE == GAME_PLAY){
+					Reflector r = m.get();
+					if (r!=null){
+						walls.add(r);
 					}
-				}
-				
+					for (int i = 0; i<walls.size(); i++){
+						if (walls.get(i).isOutOfBounds()){
+							walls.remove(i);
+						}
+					}
+	//			}
 			}
 		public void updateHighscoreScreen(){
 			updatePauseBar();
@@ -394,35 +397,10 @@ public class Game extends Canvas implements Runnable {
 			int y0 = 60, y1 = 120, y2 = 180, y3 = 240, y4 = 300;
 			int textSize = 40;
 			int add = 10;
-			
+		//	System.out.println(GAME_STATE);
 			if (one){
 				add = 0;
 				writeText(Color.orange, textSize+20, "GAME PAUSED", WIDTH/2, y0);
-			}
-			writeText(Color.yellow, 10, "Use the Arrow Keys to Choose Where to Go : Enter to select", pausedBarX, 80);
-			if (pausedBar_State == pausedBar_Menu){
-				writeText(Color.red, textSize+add, "RETURN TO MENU - 0", pausedBarX, y1);
-			}
-			else {
-				writeText(Color.orange, textSize, "RETURN TO MENU - 0", pausedBarX, y1);
-			}
-			if (pausedBar_State == pausedBar_Instructions){
-				writeText(Color.red, textSize+add, "INSTRUCTIONS - 1", pausedBarX, y2);
-			}
-			else {
-				writeText(Color.orange, textSize, "INSTRUCTIONS - 1", pausedBarX, y2);
-			}
-			if (pausedBar_State == pausedBar_TimeTrial){
-				writeText(Color.red, textSize+add, "PLAY TIMETRIAL MODE - 3", pausedBarX, y3);
-			}
-			else {
-				writeText(Color.orange, textSize, "PLAY TIMETRIAL MODE - 3", pausedBarX, y3);
-			}
-			if (pausedBar_State == pausedBar_Survival){
-				writeText(Color.red, textSize+add, "PLAY SURVIVAL MODE - 4", pausedBarX, y4);
-			}
-			else {
-				writeText(Color.orange, textSize, "PLAY SURVIVAL MODE - 4", pausedBarX, y4);
 			}
 		}
 		public void writeText(Color c, int size, String text, int x, int y){
