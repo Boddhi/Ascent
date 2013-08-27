@@ -150,8 +150,6 @@ public class Game extends Canvas implements Runnable {
 		}
 			public void initWalls(){
 				walls = new ArrayList();
-				walls.add(new Reflector(50, 50, 0, 0));
-				walls.add(new Reflector(500,500,500,400));
 			}
 		
 		
