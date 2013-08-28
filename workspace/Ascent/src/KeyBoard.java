@@ -17,7 +17,7 @@ public class KeyBoard implements KeyListener{
 		if(g.getKeyCode() == KeyEvent.VK_DOWN){
 			keyPressedDown = true;
 		}	
-		if (g.getKeyCode() == KeyEvent.VK_ENTER){
+		if (g.getKeyCode() == KeyEvent.VK_BACK_SPACE && Game.GAME_STATE == Game.GAME_PAUSE){
 			Game.enterPressed = true;
 		}
 		if (Game.GAME_STATE == Game.GAME_PLAY||Game.GAME_STATE == Game.GAME_PAUSE){
@@ -86,7 +86,7 @@ public class KeyBoard implements KeyListener{
 			}	
 		}	
 		public void changePausedStates(){
-			if (g!=null){
+			/*if (g!=null){
 				//responds if the up key was pressed
 				if (keyPressedUp){
 					//changes the state of the menu bar in response to what it was
@@ -121,7 +121,7 @@ public class KeyBoard implements KeyListener{
 					}
 					keyPressedDown = false;//resets to avoid the method running more than once
 				}	
-			}	
+			}	*/
 		}
 		public void writePlayerName(){//inputs the name of the player
 

@@ -50,11 +50,11 @@ public class Header {
 		Rectangle2D textBackground=new Rectangle2D.Double(219,232,292, 146);
 		Rectangle2D textBackground2=new Rectangle2D.Double(222,235,286, 140);
     	String text = "Paused!";
-    	String text2 = "Press              to Resume";
-    	String text3 = "Press                          to";
+    	String text2 = "Press      to Resume";
+    	String text3 = "Press                    to";
     	String text4 = "Return to Menu";
-    	String text5 = "Enter";
-    	String text6 = "BackSpace";
+    	String text5 = " 'P' ";
+    	String text6 = " Backspace";
     	graphics.setColor(Color.gray);
 		graphics.fill(textBackground);
     	graphics.setColor(Color.darkGray);
@@ -99,7 +99,7 @@ public class Header {
 	    	String text = "Q: Quit Game";
 	    	String text2= "P: Pause Game";
 	    	String text3= "Controls:";
-	    	String text4= "Use Mouse Keys";
+	    	String text4= "Click/Drag Mouse";
 	    	String text5= "To Draw Reflectors";
 	    	graphics.setColor(Color.white);
 	    	graphics.setFont(new Font("Tekton Pro", Font.PLAIN, 30));

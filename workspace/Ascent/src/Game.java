@@ -34,7 +34,9 @@ public class Game extends Canvas implements Runnable {
 	static int HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height-80;
 	private JFrame frame;
 
-		
+	//Brandon's Stuff
+	Header header = new Header();
+	
 	// game updates per second
 	static final int UPS = 60;
 	static int t = 0;
@@ -48,7 +50,7 @@ public class Game extends Canvas implements Runnable {
 	
 	//Game_state Variables
 	static int reset = -1;
-	static boolean enterPressed;
+	static boolean enterPressed = false;
 	static  int GAME_STATE = 0, GAME_MENU = 0, GAME_INSTRUCTION = 1,GAME_VIEW_HIGHSCORE = 2, GAME_PLAY = 3, GAME_PAUSE = 5, PAUSED_STATE = -1, GAME_WRITE_HIGHSCORE = 6, LOST_STATE = -1;
 	static  int pausedBar_State = 0, pausedBar_Menu = 0, pausedBar_Instructions = 1, pausedBar_TimeTrial = 3, pausedBar_Survival = 4; 
 	static  int menu_State = 1, menu_Menu = 0, menu_Instructions = 1, menu_Highscores = 2, menu_TimeTrial = 3, menu_Survival = 4; 
@@ -57,9 +59,9 @@ public class Game extends Canvas implements Runnable {
 	double rateAverage = 0;
 	
 	//Menu buttons
-	private MenuButton playButton = new MenuButton (225, 200, 356, 161, "PlayButton.png");
-	private MenuButton helpButton = new MenuButton (250, 420, 300, 150, "HelpButton.png");
-	private MenuButton quitButton = new MenuButton (250, 600, 300, 150, "QuitButton.png");
+	private MenuButton playButton = new MenuButton (225, 200, 356, 161, "images\\PlayButton.png");
+	private MenuButton helpButton = new MenuButton (250, 420, 300, 150, "images\\HelpButton.png");
+	private MenuButton quitButton = new MenuButton (250, 600, 300, 150, "images\\QuitButton.png");
 	private MenuButton [] menuButtons = {playButton, helpButton, quitButton}; 
 	
 	//Instruction Screen Variables
@@ -82,6 +84,7 @@ public class Game extends Canvas implements Runnable {
 	//----------------------------------------------------------------------------------------
 	// menu and gamestate changing methods
 	public void updateGameState(){
+	//	System.out.println(PAUSED_STATE);
 		if (reset != -1 && reset != 5){
 			GAME_STATE = reset;
 			init();
@@ -101,7 +104,8 @@ public class Game extends Canvas implements Runnable {
 		else {
 			GAME_STATE = PAUSED_STATE;
 			PAUSED_STATE = -1;
-		}
+			m.clear();
+			}
 	}
 	
 	// ---------------------------------------------------------------------------------------
@@ -158,7 +162,6 @@ public class Game extends Canvas implements Runnable {
 				walls = new ArrayList<Reflector>();
 			}
 		
-		
 		public void initBackground(){
 			try {
 				//backgroundImg = ImageIO.read(ResourceLoader.load("b.png"));
@@ -202,8 +205,9 @@ public class Game extends Canvas implements Runnable {
 			Point click = m.getClick().getPoint();
 
 			if (playButton.contains(click)) {
+				initGamePlay();
 				GAME_STATE = GAME_PLAY;
-
+				m.clear();
 			} else if (helpButton.contains(click)) {
 				GAME_STATE = menu_Instructions;
 			} else if (quitButton.contains(click)) {
@@ -239,8 +243,6 @@ public class Game extends Canvas implements Runnable {
 		Reflector r = m.get();
 		if (r != null) {
 			walls.add(r);
-			for (int i = 0; i < walls.size(); i++)
-				System.out.println(walls.get(i).getX1());
 		}
 		for (int i = 0; i < walls.size(); i++) {
 			if (walls.get(i).isOutOfBounds()) {
@@ -336,6 +338,7 @@ public class Game extends Canvas implements Runnable {
 	public void draw() {
 		//graphics.translate(0, t);
 		if (GAME_STATE == GAME_MENU){
+			drawBackground(Color.gray);
 			drawMenu();
 		}
 		if (GAME_STATE == GAME_INSTRUCTION){
@@ -428,7 +431,8 @@ public class Game extends Canvas implements Runnable {
 			}
 			
 		public void drawPauseBar(boolean one){
-			int pausedBarX = (WIDTH/2)+100;
+			header.drawPause(graphics);
+			/*int pausedBarX = (WIDTH/2);
 			int y0 = 60, y1 = 120, y2 = 180, y3 = 240, y4 = 300;
 			int textSize = 40;
 			int add = 10;
@@ -444,24 +448,12 @@ public class Game extends Canvas implements Runnable {
 			else {
 				writeText(Color.orange, textSize, "RETURN TO MENU - 0", pausedBarX, y1);
 			}
-			if (pausedBar_State == pausedBar_Instructions){
+			/*if (pausedBar_State == pausedBar_Instructions){
 				writeText(Color.red, textSize+add, "INSTRUCTIONS - 1", pausedBarX, y2);
 			}
 			else {
 				writeText(Color.orange, textSize, "INSTRUCTIONS - 1", pausedBarX, y2);
-			}
-			if (pausedBar_State == pausedBar_TimeTrial){
-				writeText(Color.red, textSize+add, "PLAY TIMETRIAL MODE - 3", pausedBarX, y3);
-			}
-			else {
-				writeText(Color.orange, textSize, "PLAY TIMETRIAL MODE - 3", pausedBarX, y3);
-			}
-			if (pausedBar_State == pausedBar_Survival){
-				writeText(Color.red, textSize+add, "PLAY SURVIVAL MODE - 4", pausedBarX, y4);
-			}
-			else {
-				writeText(Color.orange, textSize, "PLAY SURVIVAL MODE - 4", pausedBarX, y4);
-			}
+			}*/
 		}
 		public void writeText(Color c, int size, String text, int x, int y){
 			graphics.setColor(c);
