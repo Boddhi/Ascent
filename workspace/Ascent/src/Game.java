@@ -9,6 +9,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
@@ -348,6 +349,7 @@ public class Game extends Canvas implements Runnable {
 			drawHighscoreScreen();
 		}
 		if (GAME_STATE == GAME_PLAY){
+			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			drawGamePlay();
 		}
 		if (GAME_STATE == GAME_PAUSE){
@@ -370,10 +372,6 @@ public class Game extends Canvas implements Runnable {
 			helpButton.draw(graphics);
 			quitButton.draw(graphics);
 		}
-
-
-
-
 		
 		public void drawInstructions(){
 			drawBackground(Color.red);
