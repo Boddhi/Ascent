@@ -19,20 +19,15 @@ public class MenuButton {
 	private boolean hoveringOver = false;
 	private boolean pressed = false;
 
-	
-	
+
+
 	public MenuButton(int x, int y, int width, int height, String imageName) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		try {
-			this.originalImage = ImageIO.read(new File(imageName));
-			this.darkenedImage = ImageIO.read(new File(imageName));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		this.originalImage = loadBufferedImage(imageName);
+		this.darkenedImage = loadBufferedImage(imageName);
 		for (int i = 0; i < originalImage.getWidth(); i++) {
 			for (int j = 0; j < originalImage.getHeight(); j++) {
 				Color highLightedColor = convertIntToColor(originalImage.getRGB(i, j));
@@ -41,7 +36,28 @@ public class MenuButton {
 			}
 		}	
 	}
-	
+		public BufferedImage loadBufferedImage(String path){
+		BufferedImage i = null;
+		if (Game.jar){
+			try{
+				i = ImageIO.read(ResourceLoader.load(path));
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			try {
+				i = ImageIO.read(new File("images\\" + path));
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return i;
+	}
+
 	public void draw(Graphics2D graphics) {
 		if (hoveringOver) {
 			graphics.drawImage(darkenedImage,x, y, width, height, null);
@@ -50,7 +66,7 @@ public class MenuButton {
 			graphics.drawImage(originalImage,x, y, width, height, null);
 		}
 	}
-	
+
 	public boolean contains (Point mousePosition) {
 		int mouseY = (int) mousePosition.getY();
 		int mouseX = (int) mousePosition.getX();
@@ -66,12 +82,12 @@ public class MenuButton {
 	{
 		return new Color(rgb);
 	}
-		
+
 	public static int convertColorToInt (Color color) 
 	{
 		return color.getRGB();
 	}
-	
+
 	public boolean isPressed() {
 		return pressed;
 	}
@@ -83,7 +99,7 @@ public class MenuButton {
 	public boolean isHoveringOver() {
 		return hoveringOver;
 	}
-	
+
 	public void setHoveringOver(boolean hoveringOver) {
 		this.hoveringOver = hoveringOver;
 	}

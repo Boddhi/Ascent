@@ -1,6 +1,3 @@
-//Vanshil Shah
-//June 4th, 2013
-//Game class, does a lot in relation to interaction between the other classes. This class is the most important class in the game. It has a lot of logic on how the game runs, GameStates and balancing the difficulty.
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -8,9 +5,10 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
@@ -31,12 +29,9 @@ import javax.swing.JFrame;
 public class Game extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
 	// screen dimensions and variables
-	static int WIDTH =  800;//Toolkit.getDefaultToolkit().getScreenSize().width;
-	static int HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height-80;
+	static int WIDTH =  Toolkit.getDefaultToolkit().getScreenSize().width-1000;
+	static int HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height-200;
 	private JFrame frame;
-
-	//Brandon's Stuff
-	Header header = new Header();
 	
 	// game updates per second
 	static final int UPS = 60;
@@ -51,47 +46,55 @@ public class Game extends Canvas implements Runnable {
 	
 	//Game_state Variables
 	static int reset = -1;
-	static boolean enterPressed = false;
-	static  int GAME_STATE = 0, GAME_MENU = 0, GAME_INSTRUCTION = 1,GAME_VIEW_HIGHSCORE = 2, GAME_PLAY = 3, GAME_PAUSE = 5, PAUSED_STATE = -1, GAME_WRITE_HIGHSCORE = 6, LOST_STATE = -1;
-	static  int pausedBar_State = 0, pausedBar_Menu = 0, pausedBar_Instructions = 1, pausedBar_TimeTrial = 3, pausedBar_Survival = 4; 
-	static  int menu_State = 1, menu_Menu = 0, menu_Instructions = 1, menu_Highscores = 2, menu_TimeTrial = 3, menu_Survival = 4; 
+	static boolean enterPressed, backspacePressed;
+	static  int GAME_STATE = 0, GAME_MENU = 0, GAME_INSTRUCTION = 1,GAME_VIEW_HIGHSCORE = 2, GAME_PLAY = 3, GAME_PAUSE = 4, PAUSED_STATE = -1, GAME_WRITE_HIGHSCORE = 5, LOST_STATE = -1;
+	/*static  int pausedBar_State = 0, pausedBar_Menu = 0, pausedBar_Instructions = 1, pausedBar_TimeTrial = 3, pausedBar_Survival = 4; 
+	static  int menu_State = 1, menu_Menu = 0, menu_Instructions = 1, menu_Highscores = 2, menu_Play_Game = 3, menu_Credits = 4; */
 
+	//Brandon Stuff
+	//REMEMBER, Whenever you want to add an image, put it in the resources folder and use the "loadBufferedImage method"
+	//Images and other Display
+	Header header = new Header();
+	BufferedImage backgroundImg = null;
+	BufferedImage menuBackgroundImg = null;
+	BufferedImage logo = null;
+	public static boolean jar = false; // this variable lets the code know whether its being run in eclipse or not thus avoiding image loading errors. Without this we wouldnt be able to package images into our jar file
 	
+	//Menu Variables	
 	double rateAverage = 0;
-	
 	//Menu buttons
-	private MenuButton playButton = new MenuButton (225, 200, 356, 161, "images\\PlayButton.png");
-	private MenuButton helpButton = new MenuButton (250, 420, 300, 150, "images\\HelpButton.png");
-	private MenuButton quitButton = new MenuButton (250, 600, 300, 150, "images\\QuitButton.png");
+	private MenuButton playButton = new MenuButton (225, 200, 356, 161, "PlayButton.png");
+	private MenuButton helpButton = new MenuButton (250, 420, 300, 150, "HelpButton.png");
+	private MenuButton quitButton = new MenuButton (250, 600, 300, 150, "QuitButton.png");
 	private MenuButton [] menuButtons = {playButton, helpButton, quitButton}; 
 	
 	//Instruction Screen Variables
 	
 	//Highscore Variables
 	static String playerName = "";
-	public static ArrayList<Reflector> walls;
 	Vector<Score> TimeTrialHS;
 	Vector<Score> SurvivalHS;
 	static int rating = 0;
-	int score = 0;
+	public static int score = 0;
 	
 	//Game_play Variables
-	
-	BufferedImage backgroundImg = null;
-	
+	public static int scroll;
+	public static ArrayList<Reflector> walls;
+	public static Ball ball;
+		
 	// used for drawing items to the screen
 	public Graphics2D graphics;
 	
 	//----------------------------------------------------------------------------------------
 	// menu and gamestate changing methods
 	public void updateGameState(){
-	//	System.out.println(PAUSED_STATE);
-		if (reset != -1 && reset != 5){
+	//	System.out.println(m.holding);
+		if (reset != -1 && reset != GAME_PAUSE){
 			GAME_STATE = reset;
 			init();
 			reset = -1;
 		}
-		if (reset == 5){
+		if (reset == GAME_PAUSE){
 			togglePause();
 			reset = -1;
 		}
@@ -153,14 +156,41 @@ public class Game extends Canvas implements Runnable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}*/
+			logo = loadBufferedImage("Deselect.png");
 			initBackground();
 		}
-		
+		public BufferedImage loadBufferedImage(String path){
+			BufferedImage i = null;
+			if (jar){
+				try{
+					i = ImageIO.read(ResourceLoader.load(path));
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				try {
+					i = ImageIO.read(new File("Logos\\" + path));
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			return i;
+		}
 		public void initGamePlay() {
+			score = 0;
+			scroll = 0;
 			initWalls();
+			initBall();
 		}
 			public void initWalls(){
 				walls = new ArrayList<Reflector>();
+			}
+			public void initBall(){
+				ball = new Ball(WIDTH/2, HEIGHT-300, 50, Color.green);
 			}
 		
 		public void initBackground(){
@@ -177,7 +207,6 @@ public class Game extends Canvas implements Runnable {
 	// //update game objects
 	public void update() {
 		updateGameState();
-		//t++;
 		if (GAME_STATE == GAME_MENU){
 			updateMenu();
 		}
@@ -191,7 +220,7 @@ public class Game extends Canvas implements Runnable {
 			updateGamePlay();
 		}
 		if (GAME_STATE != GAME_PAUSE){	
-	
+			k.shortCutKeys();
 		}
 		else {
 			updatePauseBar();
@@ -201,70 +230,111 @@ public class Game extends Canvas implements Runnable {
 		}
 	}
 		
-	public void updateMenu() {
-		if (m.getIsCLicked()) {
-			Point click = m.getClick().getPoint();
-
-			if (playButton.contains(click)) {
-				initGamePlay();
-				GAME_STATE = GAME_PLAY;
-				m.clear();
-			} else if (helpButton.contains(click)) {
-				GAME_STATE = menu_Instructions;
-			} else if (quitButton.contains(click)) {
-				running = false;
-			}
-		}
-
-		Point mousePosition = mm.getMouse();
+		public void updateMenu(){
+			if (m.getIsClicked()) {
+				Point click = m.getClick().getPoint();
 	
-		if (mousePosition != null) {
-			for (MenuButton mb : menuButtons) {
-				if (mb.contains(mousePosition)) {
-					mb.setHoveringOver(true);
-				} else {
-					mb.setHoveringOver(false);
+				if (playButton.contains(click)) {
+					reset = GAME_PLAY;
+				} 
+				else if (helpButton.contains(click)) {
+					reset = GAME_INSTRUCTION;
+				}
+				else if (quitButton.contains(click)) {
+					running = false;
+				}
+			}
+	
+			Point mousePosition = mm.getMouse();
+	
+			if (mousePosition != null) {
+				for (MenuButton mb : menuButtons) {
+					if (mb.contains(mousePosition)) {
+						mb.setHoveringOver(true);
+					} else {
+						mb.setHoveringOver(false);
+					}
 				}
 			}
 		}
-
-	}
-
-	public void updateInstructions() {
-		updatePauseBar();
-		k.shortCutKeys();
-	}
-
-	public void updateGamePlay() {
-		k.shortCutKeys();
-		updateWalls();
-	}
-
-	public void updateWalls() {
-		Reflector r = m.get();
-		if (r != null) {
-			walls.add(r);
+		
+		public void updateInstructions(){
 		}
-		for (int i = 0; i < walls.size(); i++) {
-			if (walls.get(i).isOutOfBounds()) {
-				walls.remove(i);
-			}
-		}
-
-	}
+		
 		public void updateHighscoreScreen(){
 			updatePauseBar();
 		}
 		
+		public void updateGamePlay(){
+			t++;
+			updateWalls();
+			updateBall();
+		}
+			public void updateWalls(){	
+				scroll++;
+				Reflector r = m.get();
+				if (r!=null){
+					walls.add(r);
+				}
+				for (int i = 0; i<walls.size(); i++){
+					if (walls.get(i).isOutOfBounds()){
+						walls.remove(i);
+					}
+				}
+				if (walls.size()>5){
+					walls.remove(0);
+				}
+				//System.out.println(walls.size());
+			}
+			
+			public void updateBall(){
+				ball.live();
+				calculateBounce();
+			}
+			public void calculateBounce(){
+				double totalV = ball.getVelocityT();
+				double ballAngle;  
+				double wallAngle;
+				if (ball.getVelocityX() == 0) ballAngle = 90;
+				else ballAngle = Math.toDegrees(Math.atan(ball.getVelocityY() / ball.getVelocityX()));
+				//Object[] wall = walls.toArray();
+				for (int i = 0; i<walls.size(); i++){
+				  if(walls.get(i).getY2() == walls.get(i).getY1()){ wallAngle = 0; System.out.print("a ");}
+				  else if (walls.get(i).getX2() ==  walls.get(i).getX1()) { wallAngle = 90; System.out.print("b ");}
+				  else wallAngle = Math.toDegrees(Math.atan(((double)(walls.get(i).getY2() - walls.get(i).getY1())) / ((double)(walls.get(i).getX2() - walls.get(i).getX1()))));
+				  if(collision(walls.get(i),ball)){
+				    ball.setVelocityX(Math.sin(Math.abs(ballAngle-wallAngle))*totalV);
+				    ball.setVelocityY(Math.cos(Math.abs(ballAngle-wallAngle))*totalV);
+				    
+			//	    while(collision(walls.get(i),ball))ball.live();
+			//	    ball.live(totalV);
+				  }
+				}
+			}
+			public boolean collision(Reflector r, Ball b){
+				if(r.getLine().getBounds2D().intersects(b.getEllipse().getBounds2D())){
+					Line2D[] l = b.getLines(); 
+					for (int i = 0; i < 8; i++){
+						if(r.getLine().intersectsLine(l[i])){
+							//System.out.println("true");
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+			
 		public void updatePlayer() {	
 		}
 	
 		public void updatePauseBar(){
-			k.changePausedStates();
+			//k.changePausedStates();
 			if (enterPressed){
-				reset = pausedBar_State;
-				PAUSED_STATE = -1;
+				reset = GAME_PAUSE;
 				enterPressed = false;
+			}if (backspacePressed){
+				reset = GAME_MENU;
+				backspacePressed = false;
 			}
 		}
 		
@@ -296,7 +366,7 @@ public class Game extends Canvas implements Runnable {
 		}*/
 			public void writeTimeInTextFile(){
 				try {
-					PrintWriter timeFileWriter = new PrintWriter(new BufferedWriter(new FileWriter("TimeTrialHighScore.txt", true)));
+					PrintWriter timeFileWriter = new PrintWriter(new BufferedWriter(new FileWriter("TimeHighScore.txt", true)));
 					Double time = (double)(t/6)/10;
 					String text = time.toString();
 					timeFileWriter.println(playerName.trim() + "||" + text);
@@ -310,7 +380,7 @@ public class Game extends Canvas implements Runnable {
 			}
 			public void writeScoreInTextFile(){
 				try {
-					PrintWriter scoreFileWriter = new PrintWriter(new BufferedWriter(new FileWriter("SurvivalHighScore.txt", true)));
+					PrintWriter scoreFileWriter = new PrintWriter(new BufferedWriter(new FileWriter("ScoreHighScore.txt", true)));
 					scoreFileWriter.println(playerName.trim() + "||" + score);
 					scoreFileWriter.close();
 				} catch (FileNotFoundException e) {
@@ -337,9 +407,7 @@ public class Game extends Canvas implements Runnable {
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// draw things to the screen
 	public void draw() {
-		//graphics.translate(0, t);
 		if (GAME_STATE == GAME_MENU){
-			drawBackground(Color.gray);
 			drawMenu();
 		}
 		if (GAME_STATE == GAME_INSTRUCTION){
@@ -359,15 +427,9 @@ public class Game extends Canvas implements Runnable {
 			//drawWriteHighscore();
 		}
 	}
-	
-		
+
 		public void drawMenu(){
-//			BufferedImage background = null;
-//			try {
-//				background = ImageIO.read(new File("testpic.jpg"));
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
+			drawBackground(Color.black);
 			playButton.draw(graphics);
 			helpButton.draw(graphics);
 			quitButton.draw(graphics);
@@ -375,6 +437,8 @@ public class Game extends Canvas implements Runnable {
 		
 		public void drawInstructions(){
 			drawBackground(Color.red);
+			header.drawControls(graphics);
+			
 		}
 	
 		public void drawHighscoreScreen(){
@@ -392,13 +456,15 @@ public class Game extends Canvas implements Runnable {
 			}
 			
 		public void drawGamePlay(){	
-			drawBackground(Color.gray);
 			
+			drawBackground(Color.gray);
+			graphics.translate(0, scroll);
 			if (m.holding){
 				graphics.setColor(Color.black);
 				graphics.drawLine(m.x1, m.y1, mm.x, mm.y);
 			}
 			drawWalls();
+			drawBall();
 			//System.out.println(mm.x + ", " + mm.y);
 		}
 			public void drawWalls(){
@@ -410,7 +476,12 @@ public class Game extends Canvas implements Runnable {
 					walls.get(i).draw(graphics);
 				}
 			}
-		
+			public void drawBall(){
+				graphics.setColor(ball.getColor());
+				graphics.fill(ball.getEllipse());
+				//System.out.println("ran");
+			}
+			
 			public void drawBackground(Color c) {
 				graphics.setColor(c);
 				graphics.fillRect(0, 0, WIDTH, HEIGHT);
@@ -429,29 +500,16 @@ public class Game extends Canvas implements Runnable {
 			}
 			
 		public void drawPauseBar(boolean one){
-			header.drawPause(graphics);
-			/*int pausedBarX = (WIDTH/2);
+			/*int pausedBarX = (WIDTH/2)+100;
 			int y0 = 60, y1 = 120, y2 = 180, y3 = 240, y4 = 300;
 			int textSize = 40;
 			int add = 10;
-			
+		//	System.out.println(GAME_STATE);
 			if (one){
 				add = 0;
 				writeText(Color.orange, textSize+20, "GAME PAUSED", WIDTH/2, y0);
-			}
-			writeText(Color.yellow, 10, "Use the Arrow Keys to Choose Where to Go : Enter to select", pausedBarX, 80);
-			if (pausedBar_State == pausedBar_Menu){
-				writeText(Color.red, textSize+add, "RETURN TO MENU - 0", pausedBarX, y1);
-			}
-			else {
-				writeText(Color.orange, textSize, "RETURN TO MENU - 0", pausedBarX, y1);
-			}
-			/*if (pausedBar_State == pausedBar_Instructions){
-				writeText(Color.red, textSize+add, "INSTRUCTIONS - 1", pausedBarX, y2);
-			}
-			else {
-				writeText(Color.orange, textSize, "INSTRUCTIONS - 1", pausedBarX, y2);
 			}*/
+			header.drawPause(graphics);
 		}
 		public void writeText(Color c, int size, String text, int x, int y){
 			graphics.setColor(c);

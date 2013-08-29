@@ -1,8 +1,9 @@
 import java.awt.event.*;
 public class Mouse implements MouseListener{
+	
 	public static int x, y, x1, y1, x2, y2;
 	
-	public boolean holding;
+	public boolean holding = false;
 	public boolean rReady = false;
 	private MouseEvent click = null;
 	private boolean isClicked = false;
@@ -11,7 +12,6 @@ public class Mouse implements MouseListener{
 		if (rReady){
 			Reflector t = new Reflector(x1, y1, x2, y2);
 			rReady = false;
-			//System.out.println("ran" + Game.walls.size());
 			
 			return t;
 		}
@@ -23,30 +23,24 @@ public class Mouse implements MouseListener{
 	public void mouseClicked(MouseEvent e) {
 		click = e;
 		isClicked = true;
-		
 	}
-	
-	public MouseEvent getClick() {
+		public MouseEvent getClick() {
 		isClicked = false;
 		return click;
 	}
-	
-	public boolean getIsCLicked() {
+		public boolean getIsClicked() {
 		return isClicked;
 	}
-
-	@Override
+		
 	public void mouseEntered(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
 	}
-
+	
 	public void clear(){
 		x1 = MouseMotion.x;
 		y1 = MouseMotion.y;
@@ -57,17 +51,18 @@ public class Mouse implements MouseListener{
 	}
 
 	public void mousePressed(MouseEvent e) {
-		if(Game.GAME_STATE == Game.GAME_PAUSE || holding) return;
+		if(Game.GAME_STATE != Game.GAME_PLAY || holding) return;
 		x1 = e.getX();
-		y1 = e.getY()-Game.t;
+		y1 = e.getY()-Game.scroll;
 		holding = true;
 	}
 	
 	public void mouseReleased(MouseEvent e) {
 		if(!holding) return;
 		x2 = e.getX();
-		y2 = e.getY()-Game.t;
+		y2 = e.getY()-Game.scroll;
 		holding = false;
 		rReady = true;
 	}
+	
 }
