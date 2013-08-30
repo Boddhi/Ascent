@@ -14,7 +14,7 @@ public class Reflector {
 		this.y1 = y1;
 		this.x2 = x2;
 		this.y2 = y2;
-		System.out.println(x1);
+		//System.out.println(x1);
 		this.clickPoint = new Point2D.Double(x1, y1);
 		this.releasePoint = new Point2D.Double(x2, y2);
 		this.slope = (y2 - y1) / (x2 - x1);

@@ -189,7 +189,7 @@ public class Game extends Canvas implements Runnable {
 				walls = new ArrayList<Reflector>();
 			}
 			public void initBall(){
-				ball = new Ball(WIDTH/2, HEIGHT-300, 50, Color.green);
+				ball = new Ball(WIDTH/2, HEIGHT-300, 50, Color.ORANGE);
 			}
 
 		public void initBackground(){
@@ -322,9 +322,6 @@ public class Game extends Canvas implements Runnable {
 				}
 				return false;
 			}
-
-		public void updatePlayer() {	
-		}
 
 		public void updatePauseBar(){
 			//k.changePausedStates();
