@@ -1,325 +1,540 @@
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.Vector;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
-public class Game extends Canvas implements Runnable, KeyListener {
-	
-	// gamestates
-	private int gameState;
-	private final int GAME_TITLE = 0;
-	private final int GAME_MENU = 1;
-	private final int GAME_START = 2;
-	private final int GAME_CONTROL = 3;
-	private final int GAME_QUIT = 4;
-	private final int GAME_WIN = 5;
-	private final int GAME_LOSE = 6;
-	private final int GAME_PAUSE = 7;
-	private final int GAME_RATING = 8;
-	
-	// menuStates
-	private Menu menu;
-	private int menuState;
-	private final int MENU_PLAY = 0;
-	private final int MENU_CONTROL = 1;
-	private final int MENU_QUIT = 2;
-	private final int MENU_RATEONE = 3;
-	private final int MENU_RATETWO = 4;
-	private final int MENU_RATETHREE = 5;
-	
-	private boolean[] keyPressed = new boolean[8];
-	private final int KEY_LEFT = 0, KEY_RIGHT = 1, KEY_UP = 2, KEY_DOWN = 3,
-			KEY_Q = 4, KEY_ENTER = 5, KEY_BACKSPACE = 6, KEY_P = 7;
-	private KeyBoard keyboard = new KeyBoard();
-	
-	// Buffered Images
-	private BufferedImage Logo;
-	private BufferedImage Menu;
-	private BufferedImage Control;
-	
-	// in-Game screen variables
-	private Header header = new Header();
-	public static int scroll;
-	private int Score;
-	private int Lives;
-	private int level;
-	// used for drawing items to the screen
-	private Graphics2D graphics;
-
-	static Ball ball;
+public class Game extends Canvas implements Runnable {
+	private static final long serialVersionUID = 1L;
 	// screen dimensions and variables
-	static final int WIDTH = 800;
-	static final int HEIGHT = 600;
+	static int WIDTH =  Toolkit.getDefaultToolkit().getScreenSize().width-1000;
+	static int HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height-200;
 	private JFrame frame;
 
 	// game updates per second
 	static final int UPS = 60;
+	static int t = 0;
 
 	// variables for the thread
 	private Thread thread;
 	private boolean running;
-	
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	KeyBoard k = new KeyBoard();
+	Mouse m = new Mouse();
+	static MouseMotion mm = new MouseMotion();
+
+	//Game_state Variables
+	static int reset = -1;
+	static boolean enterPressed, backspacePressed;
+	static  int GAME_STATE = 0, GAME_MENU = 0, GAME_INSTRUCTION = 1,GAME_VIEW_HIGHSCORE = 2, GAME_PLAY = 3, GAME_PAUSE = 4, PAUSED_STATE = -1, GAME_WRITE_HIGHSCORE = 5, LOST_STATE = -1;
+	/*static  int pausedBar_State = 0, pausedBar_Menu = 0, pausedBar_Instructions = 1, pausedBar_TimeTrial = 3, pausedBar_Survival = 4; 
+	static  int menu_State = 1, menu_Menu = 0, menu_Instructions = 1, menu_Highscores = 2, menu_Play_Game = 3, menu_Credits = 4; */
+
+	//Brandon Stuff
+	//REMEMBER, Whenever you want to add an image, put it in the resources folder and use the "loadBufferedImage method"
+	//Images and other Display
+	Header header = new Header();
+	BufferedImage backgroundImg = null;
+	BufferedImage menuBackgroundImg = null;
+	BufferedImage logo = null;
+	public static boolean jar = false; // this variable lets the code know whether its being run in eclipse or not thus avoiding image loading errors. Without this we wouldnt be able to package images into our jar file
+
+	//Menu Variables	
+	double rateAverage = 0;
+	//Menu buttons
+	private MenuButton playButton = new MenuButton (225, 200, 356, 161, "PlayButton.png");
+	private MenuButton helpButton = new MenuButton (250, 420, 300, 150, "HelpButton.png");
+	private MenuButton quitButton = new MenuButton (250, 600, 300, 150, "QuitButton.png");
+	private MenuButton [] menuButtons = {playButton, helpButton, quitButton}; 
+
+	//Instruction Screen Variables
+
+	//Highscore Variables
+	static String playerName = "";
+	Vector<Score> TimeTrialHS;
+	Vector<Score> SurvivalHS;
+	static int rating = 0;
+	public static int score = 0;
+
+	//Game_play Variables
+	public static int scroll;
+	public static ArrayList<Reflector> walls;
+	public static Ball ball;
+
+	// used for drawing items to the screen
+	public Graphics2D graphics;
+
+	//----------------------------------------------------------------------------------------
+	// menu and gamestate changing methods
+	public void updateGameState(){
+	//	System.out.println(m.holding);
+		if (reset != -1 && reset != GAME_PAUSE){
+			GAME_STATE = reset;
+			init();
+			reset = -1;
+		}
+		if (reset == GAME_PAUSE){
+			togglePause();
+			reset = -1;
+		}
+
+	}
+	public void togglePause(){
+		if (PAUSED_STATE == -1){
+			PAUSED_STATE = GAME_STATE;
+			GAME_STATE = GAME_PAUSE;
+		}
+		else {
+			GAME_STATE = PAUSED_STATE;
+			PAUSED_STATE = -1;
+			m.clear();
+			}
+	}
+
+	// ---------------------------------------------------------------------------------------
 	// initialize game objects, load media(pics, music, etc)
-	public void init() {
-		gameState=GAME_START;
-		initInGame();
-	}
-
-	public void initInGame() {
-		initializeGame();
-	}
-
-	public void initializeGame() {
-		Score = 0;
-		Lives = 3;
-		level = 1;
-	}
-
-	public void loadImages() {
-		try {
-			Menu = ImageIO.read(new File("Ascent Menu.png"));
-			Control = ImageIO.read(new File("Ascent Controls.png"));
-			Logo = ImageIO.read(new File("AscentLogo.png"));
-		} catch (IOException e) {
+	public void init(){	
+		if (GAME_STATE == GAME_MENU){
+			initMenu();
 		}
-	}
-	
-	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	// update game objects
-	public void update() {
-		if (gameState == GAME_TITLE) {
-			updateTitle();
+		if (GAME_STATE == GAME_INSTRUCTION){
+
 		}
-		if (gameState == GAME_MENU || gameState == GAME_CONTROL) {
-			updateMenu();
+		if (GAME_STATE == GAME_VIEW_HIGHSCORE){
+
 		}
-		if (gameState == GAME_START) {
-			updateGame();
+		if (GAME_STATE == GAME_PLAY){
+			initGamePlay();
+		}
+		if (GAME_STATE != GAME_PAUSE){
+
+		}
+		if (GAME_STATE == GAME_WRITE_HIGHSCORE){
+			initWriteHighscore();
 		}
 	}
 
-	public void updateGame() {
-		updateGameState();
-	}
-
-	public void updateTitle() {
-		if (keyPressed[KEY_ENTER]) {
-			gameState = GAME_MENU;
-			keyPressed[KEY_ENTER] = false;
+		public void initMenu(){
+		/*	Vector<Integer> v = new Vector<Integer>(); 
+			try {
+		            Scanner s = new Scanner(new File("RatingsAndPlays.txt"));
+		            while (s.hasNextLine()) {
+		                v.add(Integer.parseInt(s.nextLine()));
+		            }
+		            s.close();
+		        } catch (FileNotFoundException e) {
+		            e.printStackTrace();
+		        }
+			rateAverage = 0;
+			for(int i = 0; i<v.size();i++){
+				rateAverage += v.elementAt(i);
+			}
+			rateAverage/=v.size();
+			try {
+				menuBackgroundImg = ImageIO.read(ResourceLoader.load("menuBackground.jpg"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}*/
+			logo = loadBufferedImage("Deselect.png");
+			initBackground();
 		}
-	}
+		public BufferedImage loadBufferedImage(String path){
+			BufferedImage i = null;
+			if (jar){
+				try{
+					i = ImageIO.read(ResourceLoader.load(path));
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				try {
+					i = ImageIO.read(new File("Logos\\" + path));
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 
-	public void updateMenu() {
-		updateMenuGameState();
-		updateMenuState();
-	}
-
-	public void updateMenuGameState() {
-		if (menuState == MENU_PLAY && keyPressed[KEY_ENTER]) {
-			gameState = GAME_START;
+			return i;
 		}
-		if (menuState == MENU_CONTROL && keyPressed[KEY_ENTER])
-			gameState = GAME_CONTROL;
-		if (menuState == MENU_QUIT && keyPressed[KEY_ENTER]) {
-			gameState = GAME_QUIT;
-			System.exit(0);
+		public void initGamePlay() {
+			score = 0;
+			scroll = 0;
+			initWalls();
+			initBall();
 		}
-		if (keyPressed[KEY_Q])
-			gameState = GAME_QUIT;
-		if (gameState == GAME_CONTROL && keyPressed[KEY_BACKSPACE])
-			gameState = GAME_MENU;
-	}
+			public void initWalls(){
+				walls = new ArrayList<Reflector>();
+			}
+			public void initBall(){
+				ball = new Ball(WIDTH/2, HEIGHT-300, 50, Color.green);
+			}
 
-	public void updateMenuState() {
-		if (menuState == MENU_PLAY && keyPressed[KEY_DOWN]) {
-			menuState = MENU_CONTROL;
-			keyPressed[KEY_DOWN] = false;
-		} else if (menuState == MENU_PLAY && keyPressed[KEY_UP]) {
-			menuState = MENU_QUIT;
-			keyPressed[KEY_UP] = false;
-		} else if (menuState == MENU_CONTROL && keyPressed[KEY_DOWN]) {
-			menuState = MENU_QUIT;
-			keyPressed[KEY_DOWN] = false;
-		} else if (menuState == MENU_CONTROL && keyPressed[KEY_UP]) {
-			menuState = MENU_PLAY;
-			keyPressed[KEY_UP] = false;
-		} else if (menuState == MENU_QUIT && keyPressed[KEY_DOWN]) {
-			menuState = MENU_PLAY;
-			keyPressed[KEY_DOWN] = false;
-		} else if (menuState == MENU_QUIT && keyPressed[KEY_UP]) {
-			menuState = MENU_CONTROL;
-			keyPressed[KEY_UP] = false;
-		} else if ((menuState == MENU_QUIT || menuState == MENU_CONTROL || menuState == MENU_PLAY)
-				&& keyPressed[KEY_LEFT])
-			menuState = MENU_RATEONE;
-		else if ((menuState == MENU_RATEONE || menuState == MENU_RATETWO || menuState == MENU_RATETHREE)
-				&& keyPressed[KEY_RIGHT])
-			menuState = MENU_PLAY;
-		else if (menuState == MENU_RATEONE && keyPressed[KEY_DOWN]) {
-			menuState = MENU_RATETWO;
-			keyPressed[KEY_DOWN] = false;
-		} else if (menuState == MENU_RATETWO && keyPressed[KEY_DOWN]) {
-			menuState = MENU_RATETHREE;
-			keyPressed[KEY_DOWN] = false;
-		} else if (menuState == MENU_RATETHREE && keyPressed[KEY_UP]) {
-			menuState = MENU_RATETWO;
-			keyPressed[KEY_UP] = false;
-		} else if (menuState == MENU_RATETWO && keyPressed[KEY_UP]) {
-			menuState = MENU_RATEONE;
-			keyPressed[KEY_UP] = false;
-		}
-	}
-
-	public void updateGameState() {
-		if (keyPressed[KEY_Q])
-			gameState = GAME_QUIT;
-		if (Lives <= 0)
-			gameState = GAME_LOSE;
-		if (keyPressed[KEY_P])
-			gameState = GAME_PAUSE;
-	}
-	
-	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	// draw things to the screen
-	public void draw() {
-		if (gameState == GAME_MENU) {
-			drawGameMenu();
-		} 
-		else if (gameState == GAME_CONTROL) {
-			graphics.drawImage(Control, 0, 0, 980, 735, null);
-		} 
-		else if (gameState == GAME_START) {
-			Rectangle2D mapBackground = new Rectangle2D.Double(0, 0, 768, 735);
-			graphics.setColor(Color.black);
-			graphics.fill(mapBackground);
-			drawIconBar();
-		} 
-		else if (gameState == GAME_LOSE) {
-			drawLose();
-			if (keyPressed[KEY_BACKSPACE])
-				gameState = GAME_MENU;
-			initializeGame();
-			initInGame();
-			keysFalse();
-		} 
-		else if (gameState == GAME_WIN) {
-			drawWin();
-			if (keyPressed[KEY_BACKSPACE])
-				gameState = GAME_MENU;
-			initializeGame();
-			initInGame();
-			keysFalse();
-		} 
-		else if (gameState == GAME_PAUSE) {
-			header.drawPause(graphics);
-			if (keyPressed[KEY_ENTER])
-				gameState = GAME_START;
-			if (keyPressed[KEY_BACKSPACE]) {
-				gameState = GAME_MENU;
-				initializeGame();
-				initInGame();
-				keysFalse();
+		public void initBackground(){
+			try {
+				//backgroundImg = ImageIO.read(ResourceLoader.load("b.png"));
+				backgroundImg  = ImageIO.read(new File("b.png"));
+			} catch (IOException e) {
 			}
 		}
-		else if(gameState == GAME_QUIT){
-			System.exit(0);
+		public void initWriteHighscore(){
+
+		}
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// //update game objects
+	public void update() {
+		updateGameState();
+		if (GAME_STATE == GAME_MENU){
+			updateMenu();
+		}
+		if (GAME_STATE == GAME_INSTRUCTION){
+			updateInstructions();
+		}
+		if (GAME_STATE == GAME_VIEW_HIGHSCORE){
+			updateHighscoreScreen();
+		}
+		if (GAME_STATE == GAME_PLAY){
+			updateGamePlay();
+		}
+		if (GAME_STATE != GAME_PAUSE){	
+			k.shortCutKeys();
+		}
+		else {
+			updatePauseBar();
+		}
+		if (GAME_STATE == GAME_WRITE_HIGHSCORE){
+			//updateWriteHighscore();
 		}
 	}
 
-	public void drawGameMenu() {
+		public void updateMenu(){
+			if (m.getIsClicked()) {
+				Point click = m.getClick().getPoint();
+
+				if (playButton.contains(click)) {
+					reset = GAME_PLAY;
+				} 
+				else if (helpButton.contains(click)) {
+					reset = GAME_INSTRUCTION;
+				}
+				else if (quitButton.contains(click)) {
+					running = false;
+				}
+			}
+
+			Point mousePosition = mm.getMouse();
+
+			if (mousePosition != null) {
+				for (MenuButton mb : menuButtons) {
+					if (mb.contains(mousePosition)) {
+						mb.setHoveringOver(true);
+					} else {
+						mb.setHoveringOver(false);
+					}
+				}
+			}
+		}
+
+		public void updateInstructions(){
+		}
+
+		public void updateHighscoreScreen(){
+			updatePauseBar();
+		}
+
+		public void updateGamePlay(){
+			t++;
+			updateWalls();
+			updateBall();
+		}
+			public void updateWalls(){	
+				scroll++;
+				Reflector r = m.getReflector();
+				if (r!=null){
+					walls.add(r);
+				}
+				for (int i = 0; i<walls.size(); i++){
+					if (walls.get(i).isOutOfBounds()){
+						walls.remove(i);
+					}
+				}
+				if (walls.size()>5){
+					walls.remove(0);
+				}
+				//System.out.println(walls.size());
+			}
+
+			public void updateBall(){
+				ball.live();
+				calculateBounce();
+			}
+			public void calculateBounce(){
+				double totalV = ball.getVelocityT();
+				double ballAngle;  
+				double wallAngle;
+				if (ball.getVelocityX() == 0) ballAngle = 90;
+				else ballAngle = Math.toDegrees(Math.atan(ball.getVelocityY() / ball.getVelocityX()));
+				//Object[] wall = walls.toArray();
+				for (int i = 0; i<walls.size(); i++){
+				  if(walls.get(i).getY2() == walls.get(i).getY1()){ wallAngle = 0; System.out.print("a ");}
+				  else if (walls.get(i).getX2() ==  walls.get(i).getX1()) { wallAngle = 90; System.out.print("b ");}
+				  else wallAngle = Math.toDegrees(Math.atan(((double)(walls.get(i).getY2() - walls.get(i).getY1())) / ((double)(walls.get(i).getX2() - walls.get(i).getX1()))));
+				  if(collision(walls.get(i),ball)){
+				    ball.setVelocityX(Math.sin(Math.abs(ballAngle-wallAngle))*totalV);
+				    ball.setVelocityY(Math.cos(Math.abs(ballAngle-wallAngle))*totalV);
+
+			//	    while(collision(walls.get(i),ball))ball.live();
+			//	    ball.live(totalV);
+				  }
+				}
+			}
+			public boolean collision(Reflector r, Ball b){
+				if(r.getLine().getBounds2D().intersects(b.getEllipse().getBounds2D())){
+					Line2D[] l = b.getLines(); 
+					for (int i = 0; i < 8; i++){
+						if(r.getLine().intersectsLine(l[i])){
+							//System.out.println("true");
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
+		public void updatePlayer() {	
+		}
+
+		public void updatePauseBar(){
+			//k.changePausedStates();
+			if (enterPressed){
+				reset = GAME_PAUSE;
+				enterPressed = false;
+			}if (backspacePressed){
+				reset = GAME_MENU;
+				backspacePressed = false;
+			}
+		}
+
+	/*	public void updateWriteHighscore(){
+			if(hs_State == hs_Writing){
+				k.writePlayerName();
+				if (enterPressed){
+					if (LOST_STATE == GAME_RANDOM){
+						writeTimeInTextFile();
+					}
+					else if (LOST_STATE == GAME_SURVIVAL){
+						writeScoreInTextFile();
+					}
+					hs_State = hs_Rating;
+					enterPressed = false;
+				}
+			}
+			if(hs_State == hs_Rating){
+				k.rateGame();
+				if (enterPressed){		
+					writeRatingInTextFile();
+					rating = 0;
+					reset = LOST_STATE;
+					hs_State = hs_Writing;
+					enterPressed = false;
+				}
+			}
+			
+		}*/
+			public void writeTimeInTextFile(){
+				try {
+					PrintWriter timeFileWriter = new PrintWriter(new BufferedWriter(new FileWriter("TimeHighScore.txt", true)));
+					Double time = (double)(t/6)/10;
+					String text = time.toString();
+					timeFileWriter.println(playerName.trim() + "||" + text);
+					timeFileWriter.close();	
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+			public void writeScoreInTextFile(){
+				try {
+					PrintWriter scoreFileWriter = new PrintWriter(new BufferedWriter(new FileWriter("ScoreHighScore.txt", true)));
+					scoreFileWriter.println(playerName.trim() + "||" + score);
+					scoreFileWriter.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e){
+					e.printStackTrace();
+				}
+
+			}
+			public void writeRatingInTextFile(){
+				try {
+					PrintWriter scoreFileWriter = new PrintWriter(new BufferedWriter(new FileWriter("RatingsAndPlays.txt", true)));
+					if (rating>5){
+						rating = 5;
+					}
+					scoreFileWriter.println(rating);
+					scoreFileWriter.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e){
+					e.printStackTrace();
+				}					
+			}
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// draw things to the screen
+	public void draw() {
+		if (GAME_STATE == GAME_MENU){
+			drawMenu();
+		}
+		if (GAME_STATE == GAME_INSTRUCTION){
+			drawInstructions();
+		}
+		if (GAME_STATE == GAME_VIEW_HIGHSCORE){
+			drawHighscoreScreen();
+		}
+		if (GAME_STATE == GAME_PLAY){
+			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			drawGamePlay();
+		}
+		if (GAME_STATE == GAME_PAUSE){
+			drawPauseBar(true);
+		}
+		if (GAME_STATE == GAME_WRITE_HIGHSCORE){
+			//drawWriteHighscore();
+		}
 	}
 
-	public void drawIconBar() {
-		Rectangle2D iconBackground = new Rectangle2D.Double(0, 2, 170, 731);
-		Rectangle2D iconBorder = new Rectangle2D.Double(0, 0, 173, 735);
-		Rectangle2D iconBackground2 = new Rectangle2D.Double(540, 2, 270, 731);
-		Rectangle2D iconBorder2 = new Rectangle2D.Double(537, 0, 270, 735);
-		Ellipse2D circ = new Ellipse2D.Double(ball.getX(),ball.getY(),ball.getWidth(),ball.getHeight());
+		public void drawMenu(){
+			drawBackground(Color.black);
+			playButton.draw(graphics);
+			helpButton.draw(graphics);
+			quitButton.draw(graphics);
+		}
 
-		graphics.setColor(Color.gray);
-		graphics.fill(iconBorder);
-		graphics.fill(iconBorder2);
-		graphics.setColor(Color.darkGray);
-		graphics.fill(iconBackground);
-		graphics.fill(iconBackground2);
+		public void drawInstructions(){
+			drawBackground(Color.red);
+			header.drawControls(graphics);
+
+		}
+
+		public void drawHighscoreScreen(){
+
+		}
+			public void drawTimeHighscore(Vector<Score> v, int x){
+				for(int i = 0; i<v.size(); i++){
+					writeText(Color.cyan, 30, v.elementAt(i).toString(), x, (40*i)+100);
+				}
+			}
+			public void drawScoreHighscore(Vector<Score> v, int x){
+				for(int i = v.size()-1; i>0; i--){
+					writeText(Color.cyan, 30, v.elementAt(i).toString(), x, (40*((v.size()-i)-1))+100);
+				}
+			}
+
+		public void drawGamePlay(){	
+
+			drawBackground(Color.gray);
+			graphics.translate(0, scroll);
+			if (m.holding){
+				graphics.setColor(Color.black);
+				graphics.drawLine((int)m.x1, (int)m.y1, (int)mm.x, (int)mm.y);
+			}
+			drawWalls();
+			drawBall();
+			//System.out.println(mm.x + ", " + mm.y);
+		}
+			public void drawWalls(){
+
+				for(int i = 0; i<walls.size(); i++){
+				//	System.out.println(i);
+					graphics.setColor(Color.cyan);
+				//	System.out.println(i);
+					walls.get(i).draw(graphics);
+				}
+			}
+			public void drawBall(){
+				graphics.setColor(ball.getColor());
+				graphics.fill(ball.getEllipse());
+				//System.out.println("ran");
+			}
+
+			public void drawBackground(Color c) {
+				graphics.setColor(c);
+				graphics.fillRect(0, 0, WIDTH, HEIGHT);
+			}
+			public void drawScore(){
+				String text = score + "";
+				writeText(Color.orange, 40, text, 0, 30);
+			}
+			public void drawTime(){
+				Double time = (double)(t/6)/10;
+				String text = time.toString();
+				writeText(Color.orange, 40, text, 400, 30);
+			}
+			public void drawPlayer() {
+
+			}
+
+		public void drawPauseBar(boolean one){
+			/*int pausedBarX = (WIDTH/2)+100;
+			int y0 = 60, y1 = 120, y2 = 180, y3 = 240, y4 = 300;
+			int textSize = 40;
+			int add = 10;
+		//	System.out.println(GAME_STATE);
+			if (one){
+				add = 0;
+				writeText(Color.orange, textSize+20, "GAME PAUSED", WIDTH/2, y0);
+			}*/
+			header.drawPause(graphics);
+		}
+		public void writeText(Color c, int size, String text, int x, int y){
+			graphics.setColor(c);
+			graphics.setFont(new Font("Arial", Font.PLAIN, size));
+			graphics.drawString(text, x, y);
+		}
+
+		/*public void drawWriteHighscore(){	 
+			drawBackground();
+			drawScore();
+			drawTime();
+			if (hs_State == hs_Writing){
+				writeText(Color.red, 50, "Please Type Your Name(Max 8 Characters):", 100, 100);
+				writeText(Color.CYAN, 40, "Please Rate This Game Out of 5(Type the Number)", 100, 300);
+			}
+			else if (hs_State == hs_Rating){
+				writeText(Color.CYAN, 50, "Please Type Your Name(Max 8 Characters):", 100, 100);
+				writeText(Color.red, 40, "Please Rate This Game Out of 5(Type the Number)", 100, 300);
+			}
+			
+			writeText(Color.CYAN, 40, playerName, 100, 200);
 		
-		graphics.setColor(ball.getColor());
-		graphics.fill(circ);
-		
-		header.drawLevel(graphics, level);
-		header.drawLives(graphics, Lives);
-		header.drawScore(graphics, Score);
-		header.drawControls(graphics);
-		header.drawLogo(Logo, graphics);
-	}
-
-	public void drawWin() {
-		header.drawWin(graphics);
-	}
-
-	public void drawLose() {
-		header.drawLose(graphics);
-	}
-	
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	// Keyboard Accessing Methods
-	public void keysFalse() {
-		keyPressed[KEY_UP] = false;
-		keyPressed[KEY_DOWN] = false;
-		keyPressed[KEY_LEFT] = false;
-		keyPressed[KEY_RIGHT] = false;
-	}
-
-	public void keyPressed(KeyEvent e) {
-		keyboard.keyPressed(keyPressed, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN,
-				KEY_Q, KEY_ENTER, KEY_BACKSPACE, KEY_P, e);
-	}
-
-	public void keyReleased(KeyEvent e) {
-	}
-
-	public void keyTyped(KeyEvent e) {
-	}
-	
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	//methods required for the thread
-	public static void main(String[] args) {
-		Game game = new Game();
-		game.frame.setResizable(false);
-		game.frame.add(game); // game is a component because it extends Canvas
-		game.frame.pack();
-		game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		game.frame.setLocationRelativeTo(null);
-		game.frame.setVisible(true);
-		game.start();
-	}
-
-	public Game() {
-		this.setBackground(Color.black);
-		Dimension size = new Dimension(WIDTH, HEIGHT);
-		setPreferredSize(size);
-		frame = new JFrame();
-		this.setFocusable(true);
-		this.requestFocus();
-		addKeyListener(this);
-	}
-
-	// starts a new thread for the game
-	public synchronized void start() {
-		thread = new Thread(this, "Game");
-		running = true;
-		thread.start();
-	}
-
+			String r = rating + "";
+			writeText(Color.CYAN, 40, r, 100, 400);
+		}*/
+	// ---------------------------------------------------------------------------------------
 	// main game loop
 	public void run() {
 		init();
@@ -328,9 +543,6 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		double delta = 0;
 		int frames = 0;
 		int updates = 0;
-		
-		ball = new Ball(300, 300, 50, 50, Color.red);
-		
 
 		long secondTimer = System.nanoTime();
 		while (running) {
@@ -343,17 +555,47 @@ public class Game extends Canvas implements Runnable, KeyListener {
 				updates++;
 			}
 			render();
-			//frames++;
+			frames++;
 
 			if (System.nanoTime() - secondTimer > 1000000000) {
-				//this.frame.setTitle(updates + " ups  ||  " + frames + " fps");
-				//secondTimer += 1000000000;
-				//frames = 0;
-				//updates = 0;
-				this.frame.setTitle("Ascent");
+				this.frame.setTitle(updates + " ups  ||  " + frames + " fps");
+				secondTimer += 1000000000;
+				frames = 0;
+				updates = 0;
 			}
 		}
-		System.exit(0);
+		stop();
+
+	}
+
+	// ---------------------------------------------------------------------------------------
+	public static void main(String[] args) {
+		Game game = new Game();
+		game.frame.setResizable(false);
+		game.frame.add(game); // game is a component because it extends Canvas
+		game.frame.pack();
+		game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		game.frame.setLocationRelativeTo(null);
+		game.frame.setVisible(true);
+		game.start();
+	}
+
+	public Game() {
+		Dimension size = new Dimension(WIDTH, HEIGHT);
+		setPreferredSize(size);
+		frame = new JFrame();
+		this.requestFocus();
+		this.setBackground(Color.black);
+		this.addKeyListener(k);
+		this.addMouseListener(m);
+		this.addMouseMotionListener(mm);
+	}
+
+	// starts a new thread for the game
+	public synchronized void start() {
+		thread = new Thread(this, "Game");
+		running = true;
+		thread.start();
 	}
 
 	public void render() {
@@ -370,8 +612,10 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		graphics.dispose();
 		bs.show();
 	}
-		// stops the game thread and quits
+
+	// stops the game thread and quits
 	public synchronized void stop() {
+		System.exit(0);
 		running = false;
 		try {
 			thread.join();
@@ -380,3 +624,4 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		}
 	}
 }
+//:3

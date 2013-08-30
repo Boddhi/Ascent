@@ -1,63 +1,74 @@
+
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 
-public class KeyBoard {
-	public void keyPressed(boolean [] keyPressed,int KEY_LEFT, int KEY_RIGHT, int KEY_UP, int KEY_DOWN, int KEY_Q, int KEY_ENTER, int KEY_BACKSPACE, int KEY_P, KeyEvent e) {
-        keyPressed[KEY_Q]=false;
-        keyPressed[KEY_P]=false;
-		keyPressed[KEY_ENTER]=false;
-		keyPressed[KEY_BACKSPACE]=false;
-		if(e.getKeyCode() == KeyEvent.VK_LEFT){
-			leftTrue(keyPressed, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN);
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_RIGHT){
-        	rightTrue(keyPressed, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN);
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_UP) {
-        	upTrue(keyPressed, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN);
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-        	downTrue(keyPressed, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN);
-        }
-        else if(e.getKeyCode() == KeyEvent.VK_Q)
-            keyPressed[KEY_Q] = true;
-        else if(e.getKeyCode() == KeyEvent.VK_ENTER)
-        	keyPressed[KEY_ENTER] = true;
-        else if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE)
-        	keyPressed[KEY_BACKSPACE] = true;
-        else if(e.getKeyCode() == KeyEvent.VK_P)
-        	keyPressed[KEY_P] = true;
-    }
-    public void leftTrue(boolean [] keyPressed,int KEY_LEFT, int KEY_RIGHT, int KEY_UP, int KEY_DOWN){
-        keyPressed[KEY_LEFT] = true;//key left is pressed
-        keyPressed[KEY_RIGHT] = false;
-        keyPressed[KEY_UP] = false;
-        keyPressed[KEY_DOWN] = false;
-    }
-    public void rightTrue(boolean [] keyPressed,int KEY_LEFT, int KEY_RIGHT, int KEY_UP, int KEY_DOWN){
-    	keyPressed[KEY_RIGHT] = true;//key right is pressed
-     	keyPressed[KEY_LEFT] = false;
-     	keyPressed[KEY_UP] = false;
-     	keyPressed[KEY_DOWN] = false;
-    }
-    public void upTrue(boolean [] keyPressed,int KEY_LEFT, int KEY_RIGHT, int KEY_UP, int KEY_DOWN){
-    	keyPressed[KEY_UP] = true; //key up is pressed
-     	keyPressed[KEY_RIGHT] = false;
-     	keyPressed[KEY_LEFT] = false;
-     	keyPressed[KEY_DOWN] = false;
-    }
-    public void downTrue(boolean [] keyPressed,int KEY_LEFT, int KEY_RIGHT, int KEY_UP, int KEY_DOWN){
-    	keyPressed[KEY_DOWN] = true; //key down is pressed
-    	keyPressed[KEY_UP] = false;
-    	keyPressed[KEY_RIGHT] = false;
-    	keyPressed[KEY_LEFT] = false;
-    }
-    public void keyReleased(KeyEvent e) {
-    	
-    }
-     
-    public void keyTyped(KeyEvent e) {
-    	
-    }
-    
+public class KeyBoard implements KeyListener{
+	boolean keyPressedUp = false, keyPressedDown = false;
+	KeyEvent g;// this gobal KeyEvent lets me run the key listener methods in the game class.
+	public void keyPressed(KeyEvent e) {
+		g = e;// whenever a key is pressed the global KeyEvent is updated
+		if(g.getKeyCode() == KeyEvent.VK_UP){
+			keyPressedUp = true;
+		}
+		if(g.getKeyCode() == KeyEvent.VK_DOWN){
+			keyPressedDown = true;
+		}
+		if (g.getKeyCode() == KeyEvent.VK_BACK_SPACE&&(Game.GAME_STATE == Game.GAME_PAUSE||Game.GAME_STATE == Game.GAME_MENU)){
+			Game.backspacePressed = true;
+		}
+		if (g.getKeyCode() == KeyEvent.VK_ENTER&&(Game.GAME_STATE == Game.GAME_PAUSE||Game.GAME_STATE == Game.GAME_MENU)){
+			Game.enterPressed = true;
+		}
+		if (Game.GAME_STATE == Game.GAME_PLAY||Game.GAME_STATE == Game.GAME_PAUSE){
+			if(g.getKeyChar() == 'p'){
+				Game.reset = Game.GAME_PAUSE;
+			}	
+		}
+	}
+	
+		public void shortCutKeys(){//shortcuts that were initially implemented for testing, very useful for the user
+			if (g!=null){
+				if(g.getKeyCode() == KeyEvent.VK_0){
+					Game.reset = 0;
+				}
+				if(g.getKeyCode() == KeyEvent.VK_1){
+					Game.reset = 1;
+				}
+				if(g.getKeyCode() == KeyEvent.VK_2){
+					Game.reset = 2;
+				}
+				if(g.getKeyCode() == KeyEvent.VK_3){
+					Game.reset = 3;
+				}
+			}	
+			g = null;
+		}		
+		
+		public void writePlayerName(){//inputs the name of the player
+
+		}
+			private boolean isLetter(char c){
+			if ((c>64&&c<91)||(c>96&&c<123)||(c>47&&c<58)){
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		
+		public void rateGame(){
+		
+		}
+		
+	public void keyReleased(KeyEvent e) {
+
+	}
+
+	public void keyTyped(KeyEvent e) {
+		
+		
+	}
+		
 }
+//:3
