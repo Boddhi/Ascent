@@ -272,7 +272,7 @@ public class Game extends Canvas implements Runnable {
 		}
 			public void updateWalls(){	
 				scroll++;
-				Reflector r = m.get();
+				Reflector r = m.getReflector();
 				if (r!=null){
 					walls.add(r);
 				}
@@ -461,7 +461,7 @@ public class Game extends Canvas implements Runnable {
 			graphics.translate(0, scroll);
 			if (m.holding){
 				graphics.setColor(Color.black);
-				graphics.drawLine(m.x1, m.y1, mm.x, mm.y);
+				graphics.drawLine((int)m.x1, (int)m.y1, (int)mm.x, (int)mm.y);
 			}
 			drawWalls();
 			drawBall();
