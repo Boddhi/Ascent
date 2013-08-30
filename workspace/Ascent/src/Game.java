@@ -170,7 +170,7 @@ public class Game extends Canvas implements Runnable {
 			}
 			else {
 				try {
-					i = ImageIO.read(new File("Logos\\" + path));
+					i = ImageIO.read(new File("images\\Logos\\" + path));
 				}
 				catch (IOException e) {
 					e.printStackTrace();
@@ -188,7 +188,7 @@ public class Game extends Canvas implements Runnable {
 			public void initWalls(){
 				walls = new ArrayList<Reflector>();
 				//walls.add(new Reflector(200,400,600,400)); no detection
-				walls.add(new Reflector(390,0,535,400)); //testing line
+				//walls.add(new Reflector(390,0,535,400)); //testing line
 			}
 			public void initBall(){
 				ball = new Ball(WIDTH/2, HEIGHT-300, 50, Color.ORANGE);
@@ -295,11 +295,7 @@ public class Game extends Canvas implements Runnable {
 			}
 			public void calculateBounce(){
 				double totalV = ball.getVelocityT();
-				double ballAngle;  
-				double wallAngle;
-				double ballSlope;
-				double wallSlope;
-				double theta;
+				double ballAngle, wallAngle, ballSlope, wallSlope, theta;
 				if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0) ballAngle = 180;
 				else if(ball.getVelocityX() == 0 && ball.getVelocityY() > 0) ballAngle = 0;
 				else {
@@ -323,6 +319,7 @@ public class Game extends Canvas implements Runnable {
 				    }	
 				}
 			}
+			
 			public boolean collision(Reflector r, Ball b){
 				if(b.getEllipse().intersects(r.getLine().getBounds2D())){
 					Line2D[] l = b.getLines(); 
