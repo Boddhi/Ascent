@@ -5,7 +5,7 @@ import java.awt.geom.Line2D;
 public class Ball {
 	private int x, y;
 	private int size;
-	private double velX = 0, velY = 2, velT;
+	private double velX = 0, velY = -4, velT;
 	private Color color;
 	
 	public Ball(int x, int y, int size, Color color){
@@ -17,13 +17,17 @@ public class Ball {
 	}
 	
 	public void live(){
-		x-=velX;
-		y-=velY;
+		x+=velX;
+		y+=velY;
+	}
+	
+	public int getRadius(){
+		return this.size;
 	}
 	
 	public void live(double mod){
-		x-=(velX+mod);
-		y-=(velY+mod);
+		x+=velX*mod;
+		y+=velY*mod;
 	}
 	
 	public Ellipse2D getEllipse(){
@@ -92,6 +96,7 @@ public class Ball {
 	public void setVelocityT(){
 		this.velT = Math.sqrt(this.velX*this.velX + this.velY * this.velY);
 	}
+	
 	public double getVelocityT(){
 		return this.velT;
 	}

@@ -188,6 +188,8 @@ public class Game extends Canvas implements Runnable {
 		}
 			public void initWalls(){
 				walls = new ArrayList<Reflector>();
+				//walls.add(new Reflector(200,400,600,400)); no detection
+				walls.add(new Reflector(390,0,535,400)); //testing line
 			}
 			public void initBall(){
 				ball = new Ball(WIDTH/2, HEIGHT-300, 50, Color.green);
@@ -289,34 +291,44 @@ public class Game extends Canvas implements Runnable {
 			
 			public void updateBall(){
 				ball.live();
+				//System.out.println(ball.getVelocityX() + " " + ball.getVelocityY());
 				calculateBounce();
 			}
 			public void calculateBounce(){
 				double totalV = ball.getVelocityT();
 				double ballAngle;  
 				double wallAngle;
-				if (ball.getVelocityX() == 0) ballAngle = 90;
-				else ballAngle = Math.toDegrees(Math.atan(ball.getVelocityY() / ball.getVelocityX()));
-				//Object[] wall = walls.toArray();
+				double ballSlope;
+				double wallSlope;
+				double theta;
+				if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0) ballAngle = 180;
+				else if(ball.getVelocityX() == 0 && ball.getVelocityY() > 0) ballAngle = 0;
+				else {
+					ballSlope = ball.getVelocityX() / ball.getVelocityY();
+					ballAngle = 180 + Math.toDegrees(Math.atan(ballSlope));
+				}
 				for (int i = 0; i<walls.size(); i++){
-				  if(walls.get(i).getY2() == walls.get(i).getY1()){ wallAngle = 0; System.out.print("a ");}
-				  else if (walls.get(i).getX2() ==  walls.get(i).getX1()) { wallAngle = 90; System.out.print("b ");}
-				  else wallAngle = Math.toDegrees(Math.atan(((double)(walls.get(i).getY2() - walls.get(i).getY1())) / ((double)(walls.get(i).getX2() - walls.get(i).getX1()))));
-				  if(collision(walls.get(i),ball)){
-				    ball.setVelocityX(Math.sin(Math.abs(ballAngle-wallAngle))*totalV);
-				    ball.setVelocityY(Math.cos(Math.abs(ballAngle-wallAngle))*totalV);
+				    if(walls.get(i).getY2() == walls.get(i).getY1()) wallAngle = 0; 
+				    else if (walls.get(i).getX2() ==  walls.get(i).getX1())wallAngle = 90;
+				    else {
+				    	wallSlope = (((double)(walls.get(i).getX2() - walls.get(i).getX1()) / (double)(walls.get(i).getY2() - walls.get(i).getY1())));
+				    	wallAngle = 180 + Math.toDegrees(Math.atan(wallSlope));
+				    }
 				    
-			//	    while(collision(walls.get(i),ball))ball.live();
-			//	    ball.live(totalV);
-				  }
+			    	theta = ballAngle + 2*(wallAngle-ballAngle);
+				    
+				    if(collision(walls.get(i),ball)){
+				    	ball.setVelocityX(Math.cos(Math.toRadians(theta))*totalV);
+				    	ball.setVelocityY(Math.sin(Math.toRadians(theta))*totalV);
+				    	ball.live(); //temporary half-solution to ball multi-catching on one line
+				    }	
 				}
 			}
 			public boolean collision(Reflector r, Ball b){
-				if(r.getLine().getBounds2D().intersects(b.getEllipse().getBounds2D())){
+				if(b.getEllipse().intersects(r.getLine().getBounds2D())){
 					Line2D[] l = b.getLines(); 
 					for (int i = 0; i < 8; i++){
 						if(r.getLine().intersectsLine(l[i])){
-							//System.out.println("true");
 							return true;
 						}
 					}
