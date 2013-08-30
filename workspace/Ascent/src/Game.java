@@ -312,12 +312,29 @@ public class Game extends Canvas implements Runnable {
 				    
 			    	theta = ballAngle + 2*(wallAngle-ballAngle);
 				    
-				    if(collision(walls.get(i),ball)){
+				    if(collision(walls.get(i),ball)&&!(walls.get(i).getHitBall())){
 				    	ball.setVelocityX(Math.cos(Math.toRadians(theta))*totalV);
 				    	ball.setVelocityY(Math.sin(Math.toRadians(theta))*totalV);
-				    	ball.live(); //temporary half-solution to ball multi-catching on one line
+				    	System.out.println("hit " + i);
+				    	wallsHit(i);
+				    	//ball.live(); //temporary half-solution to ball multi-catching on one line
 				    }	
 				}
+			}
+			public void wallsHit(int i){
+				
+				for (int j = 0; j<walls.size(); j++){
+					Reflector r = walls.get(j);
+					if (j == i){
+						r.setHitBall(true);
+					}
+					else {
+						r.setHitBall(false);
+					}
+					walls.set(j, r);
+				}
+				
+				
 			}
 			
 			public boolean collision(Reflector r, Ball b){
@@ -331,7 +348,6 @@ public class Game extends Canvas implements Runnable {
 				}
 				return false;
 			}
-
 		public void updatePauseBar(){
 			//k.changePausedStates();
 			if (enterPressed){
