@@ -312,8 +312,8 @@ public class Game extends Canvas implements Runnable {
 				else if (ball.getVelocityY() == 0 && ball.getVelocityX() > 0) ballAngle = 90;
 				else if (ball.getVelocityY() == 0) ballAngle = 270;
 				else {
-					ballSlope = ball.getVelocityY() / ball.getVelocityX();
-					if(ball.getVelocityY() < 0) { // it seems most bad bounces come from this case
+					ballSlope = ball.getVelocityX() / ball.getVelocityY();
+					if(ball.getVelocityY() < 0) { 
 						ballAngle = 180 + Math.toDegrees(Math.atan(ballSlope));
 						System.out.println("A");
 					}
