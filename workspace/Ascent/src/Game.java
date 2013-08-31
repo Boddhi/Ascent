@@ -1,4 +1,3 @@
-
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -32,18 +31,18 @@ public class Game extends Canvas implements Runnable {
 	static int WIDTH =  Toolkit.getDefaultToolkit().getScreenSize().width-1000;
 	static int HEIGHT = Toolkit.getDefaultToolkit().getScreenSize().height-200;
 	private JFrame frame;
-	
+
 	// game updates per second
 	static final int UPS = 60;
 	static int t = 0;
-	
+
 	// variables for the thread
 	private Thread thread;
 	private boolean running;
 	KeyBoard k = new KeyBoard();
 	Mouse m = new Mouse();
 	static MouseMotion mm = new MouseMotion();
-	
+
 	//Game_state Variables
 	static int reset = -1;
 	static boolean enterPressed, backspacePressed;
@@ -59,7 +58,7 @@ public class Game extends Canvas implements Runnable {
 	BufferedImage menuBackgroundImg = null;
 	BufferedImage logo = null;
 	public static boolean jar = false; // this variable lets the code know whether its being run in eclipse or not thus avoiding image loading errors. Without this we wouldnt be able to package images into our jar file
-	
+
 	//Menu Variables	
 	double rateAverage = 0;
 	//Menu buttons
@@ -67,24 +66,24 @@ public class Game extends Canvas implements Runnable {
 	private MenuButton helpButton = new MenuButton (250, 420, 300, 150, "HelpButton.png");
 	private MenuButton quitButton = new MenuButton (250, 600, 300, 150, "QuitButton.png");
 	private MenuButton [] menuButtons = {playButton, helpButton, quitButton}; 
-	
+
 	//Instruction Screen Variables
-	
+
 	//Highscore Variables
 	static String playerName = "";
 	Vector<Score> TimeTrialHS;
 	Vector<Score> SurvivalHS;
 	static int rating = 0;
 	public static int score = 0;
-	
+
 	//Game_play Variables
 	public static int scroll;
 	public static ArrayList<Reflector> walls;
 	public static Ball ball;
-		
+
 	// used for drawing items to the screen
 	public Graphics2D graphics;
-	
+
 	//----------------------------------------------------------------------------------------
 	// menu and gamestate changing methods
 	public void updateGameState(){
@@ -111,7 +110,7 @@ public class Game extends Canvas implements Runnable {
 			m.clear();
 			}
 	}
-	
+
 	// ---------------------------------------------------------------------------------------
 	// initialize game objects, load media(pics, music, etc)
 	public void init(){	
@@ -119,16 +118,16 @@ public class Game extends Canvas implements Runnable {
 			initMenu();
 		}
 		if (GAME_STATE == GAME_INSTRUCTION){
-			
+
 		}
 		if (GAME_STATE == GAME_VIEW_HIGHSCORE){
-			
+
 		}
 		if (GAME_STATE == GAME_PLAY){
 			initGamePlay();
 		}
 		if (GAME_STATE != GAME_PAUSE){
-			
+
 		}
 		if (GAME_STATE == GAME_WRITE_HIGHSCORE){
 			initWriteHighscore();
@@ -171,13 +170,13 @@ public class Game extends Canvas implements Runnable {
 			}
 			else {
 				try {
-					i = ImageIO.read(new File("Logos\\" + path));
+					i = ImageIO.read(new File("images\\Logos\\" + path));
 				}
 				catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
-			
+
 			return i;
 		}
 		public void initGamePlay() {
@@ -188,11 +187,14 @@ public class Game extends Canvas implements Runnable {
 		}
 			public void initWalls(){
 				walls = new ArrayList<Reflector>();
+				walls.add(new Reflector(0,HEIGHT-150,WIDTH,HEIGHT-150,1)); //a wall at the bottom of the screen
+				//walls.add(new Reflector(200,400,600,400)); no detection
+				//walls.add(new Reflector(390,0,535,400)); //testing line
 			}
 			public void initBall(){
-				ball = new Ball(WIDTH/2, HEIGHT-300, 50, Color.green);
+				ball = new Ball(WIDTH/2, HEIGHT-300, 50, Color.ORANGE);
 			}
-		
+
 		public void initBackground(){
 			try {
 				//backgroundImg = ImageIO.read(ResourceLoader.load("b.png"));
@@ -201,7 +203,7 @@ public class Game extends Canvas implements Runnable {
 			}
 		}
 		public void initWriteHighscore(){
-			
+
 		}
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// //update game objects
@@ -229,11 +231,11 @@ public class Game extends Canvas implements Runnable {
 			//updateWriteHighscore();
 		}
 	}
-		
+
 		public void updateMenu(){
 			if (m.getIsClicked()) {
 				Point click = m.getClick().getPoint();
-	
+
 				if (playButton.contains(click)) {
 					reset = GAME_PLAY;
 				} 
@@ -244,9 +246,9 @@ public class Game extends Canvas implements Runnable {
 					running = false;
 				}
 			}
-	
+
 			Point mousePosition = mm.getMouse();
-	
+
 			if (mousePosition != null) {
 				for (MenuButton mb : menuButtons) {
 					if (mb.contains(mousePosition)) {
@@ -257,14 +259,14 @@ public class Game extends Canvas implements Runnable {
 				}
 			}
 		}
-		
+
 		public void updateInstructions(){
 		}
-		
+
 		public void updateHighscoreScreen(){
 			updatePauseBar();
 		}
-		
+
 		public void updateGamePlay(){
 			t++;
 			updateWalls();
@@ -286,47 +288,68 @@ public class Game extends Canvas implements Runnable {
 				}
 				//System.out.println(walls.size());
 			}
-			
+
 			public void updateBall(){
 				ball.live();
+				//System.out.println(ball.getVelocityX() + " " + ball.getVelocityY());
 				calculateBounce();
 			}
 			public void calculateBounce(){
 				double totalV = ball.getVelocityT();
-				double ballAngle;  
-				double wallAngle;
-				if (ball.getVelocityX() == 0) ballAngle = 90;
-				else ballAngle = Math.toDegrees(Math.atan(ball.getVelocityY() / ball.getVelocityX()));
-				//Object[] wall = walls.toArray();
+				double ballAngle, wallAngle=0, ballSlope=0, wallSlope=0, theta;
+				if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0) ballAngle = 180;
+				else if(ball.getVelocityX() == 0 && ball.getVelocityY() > 0) ballAngle = 0;
+				else if (ball.getVelocityY() == 0 && ball.getVelocityX() > 0) ballAngle = 90;
+				else if (ball.getVelocityY() == 0) ballAngle = 270;
+				else {
+					ballSlope = ball.getVelocityY() / ball.getVelocityX();
+					if(ball.getVelocityY() < 0) {
+						ballAngle = Math.toDegrees(Math.atan(ballSlope)) + 180;
+					}
+					else {
+						ballAngle = Math.toDegrees(Math.atan(ballSlope));
+					}
+				}
 				for (int i = 0; i<walls.size(); i++){
-				  if(walls.get(i).getY2() == walls.get(i).getY1()){ wallAngle = 0; System.out.print("a ");}
-				  else if (walls.get(i).getX2() ==  walls.get(i).getX1()) { wallAngle = 90; System.out.print("b ");}
-				  else wallAngle = Math.toDegrees(Math.atan(((double)(walls.get(i).getY2() - walls.get(i).getY1())) / ((double)(walls.get(i).getX2() - walls.get(i).getX1()))));
-				  if(collision(walls.get(i),ball)){
-				    ball.setVelocityX(Math.sin(Math.abs(ballAngle-wallAngle))*totalV);
-				    ball.setVelocityY(Math.cos(Math.abs(ballAngle-wallAngle))*totalV);
-				    
-			//	    while(collision(walls.get(i),ball))ball.live();
-			//	    ball.live(totalV);
-				  }
+				    if(walls.get(i).getY2() == walls.get(i).getY1()) wallAngle = 90; 
+				    else if (walls.get(i).getX2() ==  walls.get(i).getX1())wallAngle = 180;
+				    else {
+				    	wallSlope = (((double)(walls.get(i).getX2() - walls.get(i).getX1()) / (double)(walls.get(i).getY2() - walls.get(i).getY1())));
+				    	wallAngle =  Math.toDegrees(Math.atan(wallSlope));
+				    }
+			    	theta = (ballAngle + 2*(wallAngle-ballAngle));
+			    	theta = Math.toRadians(theta);
+			 	    if(collision(walls.get(i),ball) && !(walls.get(i).getHitBall())){
+				    	ball.setVelocityX(Math.sin(theta)*totalV);
+				    	ball.setVelocityY(Math.cos(theta)*totalV);
+				    	wallsHit(i);
+				    }	
 				}
 			}
+			public void wallsHit(int i){
+				for (int j = 0; j<walls.size(); j++){
+					Reflector r = walls.get(j);
+					if (j == i){
+						r.setHitBall(true);
+					}
+					else {
+						r.setHitBall(false);
+					}
+					walls.set(j, r);
+				}
+			}
+			
 			public boolean collision(Reflector r, Ball b){
-				if(r.getLine().getBounds2D().intersects(b.getEllipse().getBounds2D())){
+				//if(b.getEllipse().intersects(r.getLine().getBounds2D())){ //seems unnecessary
 					Line2D[] l = b.getLines(); 
 					for (int i = 0; i < 8; i++){
 						if(r.getLine().intersectsLine(l[i])){
-							//System.out.println("true");
 							return true;
 						}
 					}
-				}
+				//}
 				return false;
 			}
-			
-		public void updatePlayer() {	
-		}
-	
 		public void updatePauseBar(){
 			//k.changePausedStates();
 			if (enterPressed){
@@ -337,7 +360,7 @@ public class Game extends Canvas implements Runnable {
 				backspacePressed = false;
 			}
 		}
-		
+
 	/*	public void updateWriteHighscore(){
 			if(hs_State == hs_Writing){
 				k.writePlayerName();
@@ -376,7 +399,7 @@ public class Game extends Canvas implements Runnable {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-					            
+
 			}
 			public void writeScoreInTextFile(){
 				try {
@@ -388,7 +411,7 @@ public class Game extends Canvas implements Runnable {
 				} catch (IOException e){
 					e.printStackTrace();
 				}
-						 
+
 			}
 			public void writeRatingInTextFile(){
 				try {
@@ -434,15 +457,15 @@ public class Game extends Canvas implements Runnable {
 			helpButton.draw(graphics);
 			quitButton.draw(graphics);
 		}
-		
+
 		public void drawInstructions(){
 			drawBackground(Color.red);
 			header.drawControls(graphics);
-			
+
 		}
-	
+
 		public void drawHighscoreScreen(){
-		
+
 		}
 			public void drawTimeHighscore(Vector<Score> v, int x){
 				for(int i = 0; i<v.size(); i++){
@@ -454,9 +477,9 @@ public class Game extends Canvas implements Runnable {
 					writeText(Color.cyan, 30, v.elementAt(i).toString(), x, (40*((v.size()-i)-1))+100);
 				}
 			}
-			
+
 		public void drawGamePlay(){	
-			
+
 			drawBackground(Color.gray);
 			graphics.translate(0, scroll);
 			Double slope = (mm.y - m.y1)/(mm.x - m.x1) ;
@@ -509,7 +532,7 @@ public class Game extends Canvas implements Runnable {
 		}
 		
 			public void drawWalls(){
-				
+
 				for(int i = 0; i<walls.size(); i++){
 				//	System.out.println(i);
 					graphics.setColor(Color.cyan);
@@ -522,7 +545,7 @@ public class Game extends Canvas implements Runnable {
 				graphics.fill(ball.getEllipse());
 				//System.out.println("ran");
 			}
-			
+
 			public void drawBackground(Color c) {
 				graphics.setColor(c);
 				graphics.fillRect(0, 0, WIDTH, HEIGHT);
@@ -539,7 +562,7 @@ public class Game extends Canvas implements Runnable {
 			public void drawPlayer() {
 
 			}
-			
+
 		public void drawPauseBar(boolean one){
 			/*int pausedBarX = (WIDTH/2)+100;
 			int y0 = 60, y1 = 120, y2 = 180, y3 = 240, y4 = 300;
@@ -557,7 +580,7 @@ public class Game extends Canvas implements Runnable {
 			graphics.setFont(new Font("Arial", Font.PLAIN, size));
 			graphics.drawString(text, x, y);
 		}
-		
+
 		/*public void drawWriteHighscore(){	 
 			drawBackground();
 			drawScore();
@@ -607,7 +630,7 @@ public class Game extends Canvas implements Runnable {
 			}
 		}
 		stop();
-		
+
 	}
 
 	// ---------------------------------------------------------------------------------------

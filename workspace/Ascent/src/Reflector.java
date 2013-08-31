@@ -8,13 +8,14 @@ public class Reflector {
 	private final Point2D.Double clickPoint;
 	private final Point2D.Double releasePoint;
 	private final double slope;
+	private boolean hitBall;
 
 	public Reflector(double x1, double y1, double x2, double y2) {
 		this.x1 = x1;
 		this.y1 = y1;
 		this.x2 = x2;
 		this.y2 = y2;
-		System.out.println(x1);
+		// System.out.println(x1);
 		this.clickPoint = new Point2D.Double(x1, y1);
 		this.releasePoint = new Point2D.Double(x2, y2);
 		this.slope = (y2 - y1) / (x2 - x1);
@@ -24,6 +25,18 @@ public class Reflector {
 			line = new Line2D.Double(clickPoint, getNewPoint(slope, clickPoint,
 					releasePoint));
 		}
+	}
+	
+	public Reflector(double x1, double y1, double x2, double y2,int override) { //ignores length restraints, used for debugging purposes
+		this.x1 = x1;
+		this.y1 = y1;
+		this.x2 = x2;
+		this.y2 = y2;
+		// System.out.println(x1);
+		this.clickPoint = new Point2D.Double(x1, y1);
+		this.releasePoint = new Point2D.Double(x2, y2);
+		this.slope = (y2 - y1) / (x2 - x1);
+		line = new Line2D.Double(clickPoint, releasePoint);
 	}
 
 	public static Point2D.Double getNewPoint(double slope,
@@ -67,7 +80,7 @@ public class Reflector {
 	public Line2D getLine() {
 		return line;
 	}
-
+	
 	public void draw(Graphics2D graphics) {
 		graphics.draw(getLine());
 	}
@@ -75,15 +88,13 @@ public class Reflector {
 	public double getX1() {
 		return x1;
 	}
-
 	public void setX1(int x1) {
 		this.x1 = x1;
 	}
-
+	
 	public double getY1() {
 		return y1;
 	}
-
 	public void setY1(int y1) {
 		this.y1 = y1;
 	}
@@ -91,7 +102,6 @@ public class Reflector {
 	public double getX2() {
 		return x2;
 	}
-
 	public void setX2(int x2) {
 		this.x2 = x2;
 	}
@@ -99,9 +109,14 @@ public class Reflector {
 	public double getY2() {
 		return y2;
 	}
-
 	public void setY2(int y2) {
 		this.y2 = y2;
 	}
-
+	
+	public void setHitBall(boolean hitBall){
+		this.hitBall = hitBall;
+	}
+	public boolean getHitBall(){
+		return hitBall;
+	}
 }
