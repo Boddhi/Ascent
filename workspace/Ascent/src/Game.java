@@ -459,14 +459,55 @@ public class Game extends Canvas implements Runnable {
 			
 			drawBackground(Color.gray);
 			graphics.translate(0, scroll);
+			Double slope = (mm.y - m.y1)/(mm.x - m.x1) ;
+			Point2D.Double clickPoint = new Point2D.Double(m.x1, m.y1);
+			Point2D.Double cursorPoint = new Point2D.Double(mm.x, mm.y);
+			Line2D.Double line = new Line2D.Double(clickPoint, cursorPoint);
+			
 			if (m.holding){
+				
 				graphics.setColor(Color.black);
-				graphics.drawLine((int)m.x1, (int)m.y1, (int)mm.x, (int)mm.y);
+				if (getLength(line) > 200) {
+					line = new Line2D.Double(clickPoint, getNewPoint(slope, clickPoint, cursorPoint));
+				}
+				graphics.draw(line);
 			}
 			drawWalls();
 			drawBall();
 			//System.out.println(mm.x + ", " + mm.y);
 		}
+		
+		private Point2D.Double getNewPoint(double slope,
+				Point2D.Double clickPoint, Point2D.Double releasePoint) {
+			int maxLength = 200;
+			double angle = Math.atan(slope) * 180 / Math.PI;
+			if (angle < 0) {
+				angle += 360;
+			}
+			double newPointX = (maxLength * Math.cos(Math.toRadians(angle)) + clickPoint
+					.getX());
+			double newPointY = (maxLength * Math.sin(Math.toRadians(angle)) + clickPoint
+					.getY());
+			if (releasePoint.getX() < clickPoint.getX()) {
+				double xDifference = newPointX - clickPoint.getX();
+				newPointX = clickPoint.getX() - xDifference;
+				double yDifference = newPointY - clickPoint.getY();
+				newPointY = clickPoint.getY() - yDifference;
+			}
+			Point2D.Double newPoint = new Point2D.Double(newPointX, newPointY);
+			return newPoint;
+		}
+		
+		private double getLength(Line2D.Double line) {
+			double x1 = line.getX1();
+			double x2 = line.getX2();
+			double y1 = line.getY1();
+			double y2 = line.getY2();
+			double length = Math
+					.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+			return length;
+		}
+		
 			public void drawWalls(){
 				
 				for(int i = 0; i<walls.size(); i++){
