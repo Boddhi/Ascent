@@ -26,6 +26,18 @@ public class Reflector {
 					releasePoint));
 		}
 	}
+	
+	public Reflector(double x1, double y1, double x2, double y2,int override) {
+		this.x1 = x1;
+		this.y1 = y1;
+		this.x2 = x2;
+		this.y2 = y2;
+		// System.out.println(x1);
+		this.clickPoint = new Point2D.Double(x1, y1);
+		this.releasePoint = new Point2D.Double(x2, y2);
+		this.slope = (y2 - y1) / (x2 - x1);
+		line = new Line2D.Double(clickPoint, releasePoint);
+	}
 
 	public static Point2D.Double getNewPoint(double slope,
 			Point2D.Double clickPoint, Point2D.Double releasePoint) {

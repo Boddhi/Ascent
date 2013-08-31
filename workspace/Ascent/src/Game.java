@@ -187,6 +187,7 @@ public class Game extends Canvas implements Runnable {
 		}
 			public void initWalls(){
 				walls = new ArrayList<Reflector>();
+				walls.add(new Reflector(0,HEIGHT-150,WIDTH,HEIGHT-150,1));
 				//walls.add(new Reflector(200,400,600,400)); no detection
 				//walls.add(new Reflector(390,0,535,400)); //testing line
 			}
@@ -295,34 +296,33 @@ public class Game extends Canvas implements Runnable {
 			}
 			public void calculateBounce(){
 				double totalV = ball.getVelocityT();
-				double ballAngle, wallAngle, ballSlope, wallSlope, theta;
+				double ballAngle, wallAngle, ballSlope=0, wallSlope=0, theta;
 				if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0) ballAngle = 180;
 				else if(ball.getVelocityX() == 0 && ball.getVelocityY() > 0) ballAngle = 0;
+				else if (ball.getVelocityY() == 0 && ball.getVelocityX() > 0) ballAngle = 90;
+				else if (ball.getVelocityY() == 0) ballAngle = 270;
 				else {
-					ballSlope = ball.getVelocityX() / ball.getVelocityY();
-					ballAngle = 180 + Math.toDegrees(Math.atan(ballSlope));
+					ballSlope = ball.getVelocityY() / ball.getVelocityX();
+					if(ball.getVelocityY() < 0) ballAngle = Math.toDegrees(Math.atan(ballSlope) + 180);
+					else ballAngle = Math.toDegrees(Math.atan(ballSlope));
 				}
 				for (int i = 0; i<walls.size(); i++){
-				    if(walls.get(i).getY2() == walls.get(i).getY1()) wallAngle = 0; 
-				    else if (walls.get(i).getX2() ==  walls.get(i).getX1())wallAngle = 90;
+				    if(walls.get(i).getY2() == walls.get(i).getY1()) wallAngle = 90; 
+				    else if (walls.get(i).getX2() ==  walls.get(i).getX1())wallAngle = 180;
 				    else {
 				    	wallSlope = (((double)(walls.get(i).getX2() - walls.get(i).getX1()) / (double)(walls.get(i).getY2() - walls.get(i).getY1())));
-				    	wallAngle = 180 + Math.toDegrees(Math.atan(wallSlope));
+				    	wallAngle =  Math.toDegrees(Math.atan(wallSlope));
 				    }
-				    
-			    	theta = ballAngle + 2*(wallAngle-ballAngle);
-				    
-				    if(collision(walls.get(i),ball)&&!(walls.get(i).getHitBall())){
-				    	ball.setVelocityX(Math.cos(Math.toRadians(theta))*totalV);
-				    	ball.setVelocityY(Math.sin(Math.toRadians(theta))*totalV);
-				    	System.out.println("hit " + i);
+			    	theta = (ballAngle + 2*(wallAngle-ballAngle));
+			    	theta = Math.toRadians(theta);
+			 	    if(collision(walls.get(i),ball) && !(walls.get(i).getHitBall())){
+				    	ball.setVelocityX(Math.sin(theta)*totalV);
+				    	ball.setVelocityY(Math.cos(theta)*totalV);
 				    	wallsHit(i);
-				    	//ball.live(); //temporary half-solution to ball multi-catching on one line
 				    }	
 				}
 			}
 			public void wallsHit(int i){
-				
 				for (int j = 0; j<walls.size(); j++){
 					Reflector r = walls.get(j);
 					if (j == i){
@@ -333,19 +333,17 @@ public class Game extends Canvas implements Runnable {
 					}
 					walls.set(j, r);
 				}
-				
-				
 			}
 			
 			public boolean collision(Reflector r, Ball b){
-				if(b.getEllipse().intersects(r.getLine().getBounds2D())){
+				//if(b.getEllipse().intersects(r.getLine().getBounds2D())){ //seems unnecessary
 					Line2D[] l = b.getLines(); 
 					for (int i = 0; i < 8; i++){
 						if(r.getLine().intersectsLine(l[i])){
 							return true;
 						}
 					}
-				}
+				//}
 				return false;
 			}
 		public void updatePauseBar(){

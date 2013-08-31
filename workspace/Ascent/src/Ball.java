@@ -5,7 +5,7 @@ import java.awt.geom.Line2D;
 public class Ball {
 	private int x, y;
 	private int size;
-	private double velX = 0, velY = -4, velT;
+	private double velX = 0, velY = -5, velT;
 	private Color color;
 	
 	public Ball(int x, int y, int size, Color color){
