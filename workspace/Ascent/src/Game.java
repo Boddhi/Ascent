@@ -296,15 +296,19 @@ public class Game extends Canvas implements Runnable {
 			}
 			public void calculateBounce(){
 				double totalV = ball.getVelocityT();
-				double ballAngle, wallAngle, ballSlope=0, wallSlope=0, theta;
+				double ballAngle, wallAngle=0, ballSlope=0, wallSlope=0, theta;
 				if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0) ballAngle = 180;
 				else if(ball.getVelocityX() == 0 && ball.getVelocityY() > 0) ballAngle = 0;
 				else if (ball.getVelocityY() == 0 && ball.getVelocityX() > 0) ballAngle = 90;
 				else if (ball.getVelocityY() == 0) ballAngle = 270;
 				else {
 					ballSlope = ball.getVelocityY() / ball.getVelocityX();
-					if(ball.getVelocityY() < 0) ballAngle = Math.toDegrees(Math.atan(ballSlope) + 180);
-					else ballAngle = Math.toDegrees(Math.atan(ballSlope));
+					if(ball.getVelocityY() < 0) {
+						ballAngle = Math.toDegrees(Math.atan(ballSlope)) + 180;
+					}
+					else {
+						ballAngle = Math.toDegrees(Math.atan(ballSlope));
+					}
 				}
 				for (int i = 0; i<walls.size(); i++){
 				    if(walls.get(i).getY2() == walls.get(i).getY1()) wallAngle = 90; 
