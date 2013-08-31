@@ -27,7 +27,7 @@ public class Reflector {
 		}
 	}
 	
-	public Reflector(double x1, double y1, double x2, double y2,int override) {
+	public Reflector(double x1, double y1, double x2, double y2,int override) { //ignores length restraints, used for debugging purposes
 		this.x1 = x1;
 		this.y1 = y1;
 		this.x2 = x2;

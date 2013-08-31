@@ -187,7 +187,7 @@ public class Game extends Canvas implements Runnable {
 		}
 			public void initWalls(){
 				walls = new ArrayList<Reflector>();
-				walls.add(new Reflector(0,HEIGHT-150,WIDTH,HEIGHT-150,1));
+				walls.add(new Reflector(0,HEIGHT-150,WIDTH,HEIGHT-150,1)); //a wall at the bottom of the screen
 				//walls.add(new Reflector(200,400,600,400)); no detection
 				//walls.add(new Reflector(390,0,535,400)); //testing line
 			}
