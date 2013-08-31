@@ -295,6 +295,16 @@ public class Game extends Canvas implements Runnable {
 				calculateBounce();
 			}
 			public void calculateBounce(){
+				//Angles are configured the following way:
+				/*
+				 *             180 deg
+				 *              ^
+				 *    270 deg <   > 90 deg
+				 *              v
+				 *             0/360 deg
+				 * 
+				 * 
+				 */
 				double totalV = ball.getVelocityT();
 				double ballAngle, wallAngle=0, ballSlope=0, wallSlope=0, theta;
 				if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0) ballAngle = 180;
@@ -302,12 +312,14 @@ public class Game extends Canvas implements Runnable {
 				else if (ball.getVelocityY() == 0 && ball.getVelocityX() > 0) ballAngle = 90;
 				else if (ball.getVelocityY() == 0) ballAngle = 270;
 				else {
-					ballSlope = ball.getVelocityY() / ball.getVelocityX();
-					if(ball.getVelocityY() < 0) {
-						ballAngle = Math.toDegrees(Math.atan(ballSlope)) + 180;
+					ballSlope = ball.getVelocityX() / ball.getVelocityY();
+					if(ball.getVelocityY() < 0) { 
+						ballAngle = 180 + Math.toDegrees(Math.atan(ballSlope));
+	//					System.out.println("A");
 					}
 					else {
 						ballAngle = Math.toDegrees(Math.atan(ballSlope));
+	//					System.out.println("B");
 					}
 				}
 				for (int i = 0; i<walls.size(); i++){
@@ -320,6 +332,7 @@ public class Game extends Canvas implements Runnable {
 			    	theta = (ballAngle + 2*(wallAngle-ballAngle));
 			    	theta = Math.toRadians(theta);
 			 	    if(collision(walls.get(i),ball) && !(walls.get(i).getHitBall())){
+	//		 	    	System.out.println("ball angle: " + ballAngle + " wallAngle: " + wallAngle + " theta: " + Math.toDegrees(theta));
 				    	ball.setVelocityX(Math.sin(theta)*totalV);
 				    	ball.setVelocityY(Math.cos(theta)*totalV);
 				    	wallsHit(i);
