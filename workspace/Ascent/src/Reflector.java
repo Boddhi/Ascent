@@ -9,6 +9,7 @@ public class Reflector {
 	private final Point2D.Double releasePoint;
 	private final double slope;
 	private boolean hitBall;
+	private int thickness = 6;
 
 	public Reflector(double x1, double y1, double x2, double y2) {
 		this.x1 = x1;
@@ -69,7 +70,7 @@ public class Reflector {
 				.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 		return length;
 	}
-
+	
 	public boolean isOutOfBounds() {
 		if (y1 > Game.HEIGHT - Game.scroll && y2 > Game.HEIGHT - Game.scroll) {
 			return true;
