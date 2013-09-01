@@ -8,8 +8,10 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.Toolkit;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
@@ -79,6 +81,7 @@ public class Game extends Canvas implements Runnable {
 	public static int score = 0;
 
 	//Game_play Variables
+	BufferedImage logImg = null;
 	public static int scroll;
 	public static ArrayList<Reflector> reflectors;
 	public static ArrayList<Reflector> obstacles;
@@ -185,6 +188,7 @@ public class Game extends Canvas implements Runnable {
 		public void initGamePlay() {
 			score = 0;
 			scroll = 0;
+			logImg = loadBufferedImage("brownLog.png");
 			initWalls();
 			initObstacles();
 			initBall();
@@ -300,7 +304,7 @@ public class Game extends Canvas implements Runnable {
 			public void updateObstacles(){
 				
 				if (t%60 == 0){
-					obstacles.add(generateNewObstacle());
+					//obstacles.add(generateNewObstacle());
 				}
 				
 				for (int i = 0; i<obstacles.size(); i++){
@@ -312,10 +316,9 @@ public class Game extends Canvas implements Runnable {
 				public Reflector generateNewObstacle(){
 					Random R = new Random();
 					Reflector r = new Reflector(R.nextInt(800)-scroll, R.nextInt(800)-scroll, R.nextInt(800)-scroll, R.nextInt(800)-scroll);
-					if (scroll == 799){
-						System.out.println(scroll);
-					}
+					System.out.println(scroll);
 					return r;
+					
 				}
 			public void updateBall(){
 				ball.live();
@@ -323,8 +326,7 @@ public class Game extends Canvas implements Runnable {
 				calculateBounce(reflectors);
 				calculateBounce(obstacles);
 			}
-			
-			public void calculateBounce(ArrayList<Reflector> obstacles2){
+			public void calculateBounce(ArrayList<Reflector> vector){
 				//Angles are configured the following way:
 				/*
 				 *             180 deg
@@ -352,36 +354,35 @@ public class Game extends Canvas implements Runnable {
 	//					System.out.println("B");
 					}
 				}
-				for (int i = 0; i<obstacles2.size(); i++){
-				    if(obstacles2.get(i).getY2() == obstacles2.get(i).getY1()) wallAngle = 90; 
-				    else if (obstacles2.get(i).getX2() ==  obstacles2.get(i).getX1())wallAngle = 180;
+				for (int i = 0; i<vector.size(); i++){
+				    if(vector.get(i).getY2() == vector.get(i).getY1()) wallAngle = 90; 
+				    else if (vector.get(i).getX2() ==  vector.get(i).getX1())wallAngle = 180;
 				    else {
-				    	wallSlope = (((double)(obstacles2.get(i).getX2() - obstacles2.get(i).getX1()) / (double)(obstacles2.get(i).getY2() - obstacles2.get(i).getY1())));
+				    	wallSlope = (((double)(vector.get(i).getX2() - vector.get(i).getX1()) / (double)(vector.get(i).getY2() - vector.get(i).getY1())));
 				    	wallAngle =  Math.toDegrees(Math.atan(wallSlope));
 				    }
 			    	theta = (ballAngle + 2*(wallAngle-ballAngle));
 			    	theta = Math.toRadians(theta);
-			 	    if(collision(obstacles2.get(i),ball) && !(obstacles2.get(i).getHitBall())){
+			 	    if(collision(vector.get(i),ball) && !(vector.get(i).getHitBall())){
 	//		 	    	System.out.println("ball angle: " + ballAngle + " wallAngle: " + wallAngle + " theta: " + Math.toDegrees(theta));
 				    	ball.setVelocityX(Math.sin(theta)*totalV);
 				    	ball.setVelocityY(Math.cos(theta)*totalV);
-				    	wallsHit(obstacles2, i);
+				    	wallsHit(vector, i);
 				    }	
 				}
 			}
-			public void wallsHit(ArrayList<Reflector> obstacles2, int i){
-				for (int j = 0; j<obstacles2.size(); j++){
-					Reflector r = obstacles2.get(j);
+				public void wallsHit(ArrayList<Reflector> vector, int i){
+				for (int j = 0; j<vector.size(); j++){
+					Reflector r = vector.get(j);
 					if (j == i){
 						r.setHitBall(true);
 					}
 					else {
 						r.setHitBall(false);
 					}
-					obstacles2.set(j, r);
+					vector.set(j, r);
 				}
 			}
-			
 			public boolean collision(Reflector r, Ball b){
 				//if(b.getEllipse().intersects(r.getLine().getBounds2D())){ //seems unnecessary
 					Line2D[] l = b.getLines(); 
@@ -393,6 +394,7 @@ public class Game extends Canvas implements Runnable {
 				//}
 				return false;
 			}
+		
 		public void updatePauseBar(){
 			//k.changePausedStates();
 			if (enterPressed){
@@ -544,8 +546,24 @@ public class Game extends Canvas implements Runnable {
 					graphics.setStroke(new BasicStroke(thickness));
 					reflectors.get(i).draw(graphics);
 					graphics.setStroke(oldStroke);
-				}
+					/*
+					double wallSlope = 0, wallAngle = 0;
+					wallSlope = (((double)(reflectors.get(i).getX2() - reflectors.get(i).getX1()) / (double)(reflectors.get(i).getY2() - reflectors.get(i).getY1())));
+			    	wallAngle =  Math.toRadians(Math.toDegrees(Math.atan(wallSlope)));
+			    	BufferedImage logImg2 = rotate(logImg, wallAngle);
+			    	Reflector r = reflectors.get(i);
+			    	graphics.drawImage(logImg2, (int)r.getX1(), (int)r.getY1(), logImg2.getWidth(), logImg2.getHeight(), null);
+			    	*/
+				}				
 			}
+				private BufferedImage rotate(BufferedImage bufferedImage, double radians) {
+					AffineTransform at = new AffineTransform();
+					at.rotate(radians, 0, 0);
+					AffineTransformOp ato = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+					BufferedImage dst = null;
+					ato.filter(bufferedImage, dst);
+					return dst;
+				}
 			public void drawObstacles(){
 				for(int i = 0; i<obstacles.size(); i++){
 				//	System.out.println(i);
