@@ -1,3 +1,4 @@
+import java.awt.BasicStroke;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -5,6 +6,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -78,7 +80,8 @@ public class Game extends Canvas implements Runnable {
 
 	//Game_play Variables
 	public static int scroll;
-	public static ArrayList<Reflector> walls;
+	public static ArrayList<Reflector> reflectors;
+	public static ArrayList<Reflector> obstacles;
 	public static Ball ball;
 
 	// used for drawing items to the screen
@@ -183,13 +186,18 @@ public class Game extends Canvas implements Runnable {
 			score = 0;
 			scroll = 0;
 			initWalls();
+			initObstacles();
 			initBall();
 		}
 			public void initWalls(){
-				walls = new ArrayList<Reflector>();
-				walls.add(new Reflector(0,HEIGHT-150,WIDTH,HEIGHT-150,1)); //a wall at the bottom of the screen
+				reflectors = new ArrayList<Reflector>();
+				reflectors.add(new Reflector(0,HEIGHT-150,WIDTH,HEIGHT-150,1)); //a wall at the bottom of the screen			
 				//walls.add(new Reflector(200,400,600,400)); no detection
 				//walls.add(new Reflector(390,0,535,400)); //testing line
+			}
+			public void initObstacles(){
+
+				obstacles = new ArrayList<Reflector>();
 			}
 			public void initBall(){
 				ball = new Ball(WIDTH/2, HEIGHT-300, 50, Color.ORANGE);
@@ -269,32 +277,54 @@ public class Game extends Canvas implements Runnable {
 
 		public void updateGamePlay(){
 			t++;
-			updateWalls();
+			updateReflectors();
+			updateObstacles();
 			updateBall();
 		}
-			public void updateWalls(){	
+			public void updateReflectors(){	
 				scroll++;
 				Reflector r = m.getReflector();
 				if (r!=null){
-					walls.add(r);
+					reflectors.add(r);
 				}
-				for (int i = 0; i<walls.size(); i++){
-					if (walls.get(i).isOutOfBounds()){
-						walls.remove(i);
+				for (int i = 0; i<reflectors.size(); i++){
+					if (reflectors.get(i).isOutOfBounds()){
+						reflectors.remove(i);
 					}
 				}
-				if (walls.size()>5){
-					walls.remove(0);
+				if (reflectors.size()>5){
+					reflectors.remove(0);
 				}
 				//System.out.println(walls.size());
 			}
-
+			public void updateObstacles(){
+				
+				if (t%60 == 0){
+					obstacles.add(generateNewObstacle());
+				}
+				
+				for (int i = 0; i<obstacles.size(); i++){
+					if (obstacles.get(i).isOutOfBounds()){
+						obstacles.remove(i);
+					}
+				}
+			}
+				public Reflector generateNewObstacle(){
+					Random R = new Random();
+					Reflector r = new Reflector(R.nextInt(800)-scroll, R.nextInt(800)-scroll, R.nextInt(800)-scroll, R.nextInt(800)-scroll);
+					if (scroll == 799){
+						System.out.println(scroll);
+					}
+					return r;
+				}
 			public void updateBall(){
 				ball.live();
 				//System.out.println(ball.getVelocityX() + " " + ball.getVelocityY());
-				calculateBounce();
+				calculateBounce(reflectors);
+				calculateBounce(obstacles);
 			}
-			public void calculateBounce(){
+			
+			public void calculateBounce(ArrayList<Reflector> obstacles2){
 				//Angles are configured the following way:
 				/*
 				 *             180 deg
@@ -322,33 +352,33 @@ public class Game extends Canvas implements Runnable {
 	//					System.out.println("B");
 					}
 				}
-				for (int i = 0; i<walls.size(); i++){
-				    if(walls.get(i).getY2() == walls.get(i).getY1()) wallAngle = 90; 
-				    else if (walls.get(i).getX2() ==  walls.get(i).getX1())wallAngle = 180;
+				for (int i = 0; i<obstacles2.size(); i++){
+				    if(obstacles2.get(i).getY2() == obstacles2.get(i).getY1()) wallAngle = 90; 
+				    else if (obstacles2.get(i).getX2() ==  obstacles2.get(i).getX1())wallAngle = 180;
 				    else {
-				    	wallSlope = (((double)(walls.get(i).getX2() - walls.get(i).getX1()) / (double)(walls.get(i).getY2() - walls.get(i).getY1())));
+				    	wallSlope = (((double)(obstacles2.get(i).getX2() - obstacles2.get(i).getX1()) / (double)(obstacles2.get(i).getY2() - obstacles2.get(i).getY1())));
 				    	wallAngle =  Math.toDegrees(Math.atan(wallSlope));
 				    }
 			    	theta = (ballAngle + 2*(wallAngle-ballAngle));
 			    	theta = Math.toRadians(theta);
-			 	    if(collision(walls.get(i),ball) && !(walls.get(i).getHitBall())){
+			 	    if(collision(obstacles2.get(i),ball) && !(obstacles2.get(i).getHitBall())){
 	//		 	    	System.out.println("ball angle: " + ballAngle + " wallAngle: " + wallAngle + " theta: " + Math.toDegrees(theta));
 				    	ball.setVelocityX(Math.sin(theta)*totalV);
 				    	ball.setVelocityY(Math.cos(theta)*totalV);
-				    	wallsHit(i);
+				    	wallsHit(obstacles2, i);
 				    }	
 				}
 			}
-			public void wallsHit(int i){
-				for (int j = 0; j<walls.size(); j++){
-					Reflector r = walls.get(j);
+			public void wallsHit(ArrayList<Reflector> obstacles2, int i){
+				for (int j = 0; j<obstacles2.size(); j++){
+					Reflector r = obstacles2.get(j);
 					if (j == i){
 						r.setHitBall(true);
 					}
 					else {
 						r.setHitBall(false);
 					}
-					walls.set(j, r);
+					obstacles2.set(j, r);
 				}
 			}
 			
@@ -499,17 +529,33 @@ public class Game extends Canvas implements Runnable {
 				graphics.setColor(Color.black);
 				graphics.drawLine((int)m.x1, (int)m.y1, (int)mm.x, (int)mm.y);
 			}
-			drawWalls();
+			drawReflectors();
+			drawObstacles();
 			drawBall();
 			//System.out.println(mm.x + ", " + mm.y);
 		}
-			public void drawWalls(){
-
-				for(int i = 0; i<walls.size(); i++){
+			public void drawReflectors(){
+				for(int i = 0; i<reflectors.size(); i++){
 				//	System.out.println(i);
 					graphics.setColor(Color.cyan);
 				//	System.out.println(i);
-					walls.get(i).draw(graphics);
+					float thickness = 15;
+					Stroke oldStroke = graphics.getStroke();
+					graphics.setStroke(new BasicStroke(thickness));
+					reflectors.get(i).draw(graphics);
+					graphics.setStroke(oldStroke);
+				}
+			}
+			public void drawObstacles(){
+				for(int i = 0; i<obstacles.size(); i++){
+				//	System.out.println(i);
+					graphics.setColor(Color.green);
+				//	System.out.println(i);
+					float thickness = 15;
+					Stroke oldStroke = graphics.getStroke();
+					graphics.setStroke(new BasicStroke(thickness));
+					obstacles.get(i).draw(graphics);
+					graphics.setStroke(oldStroke);
 				}
 			}
 			public void drawBall(){
