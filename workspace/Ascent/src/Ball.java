@@ -7,7 +7,7 @@ public class Ball {
 	private int size;
 	private double velX = 0, velY = -5, velT; //should un-hardcode this soon
 	private Color color;
-	
+
 	public Ball(int x, int y, int size, Color color){
 		setX(x);
 		setY(y);
@@ -15,26 +15,26 @@ public class Ball {
 		setColor(color);
 		setVelocityT();
 	}
-	
+
 	public void live(){
 		x+=velX;
 		y+=velY;
 	}
-	
+
 	public int getRadius(){
 		return this.size;
 	}
-	
+
 	public void live(double mod){
 		x+=velX*mod;
 		y+=velY*mod;
 	}
-	
+
 	public Ellipse2D getEllipse(){
 		Ellipse2D.Double e = new Ellipse2D.Double(x, y, size, size);
 		return e;
 	}
-	
+
 	public Line2D[] getLines(){
 		int x1 = (int)(x-velX), y1 = (int)(y-velY);
 		int[] xPoints = {(int)x1, (int)(x1+size*0.3), (int)(x1+size*0.7),(int)(x1+size), (int)(x1+size), (int)(x1+size*0.7), (int)(x1+size*0.3), (int)x1};
@@ -50,53 +50,53 @@ public class Ball {
 		lines[7] = new Line2D.Double(xPoints[7], yPoints[7], xPoints[0], yPoints[0]);
 		return lines;
 	}	
-	
+
 	public void setX(int x){
 		this.x=x;
 	}
 	public int getX(){
 		return this.x;
 	}
-	
+
 	public void setY(int y){
 		this.y=y;
 	}
 	public int getY(){
 		return this.y;
 	}
-	
+
 	public void setSize(int size){
 		this.size=size;
 	}
 	public int getSize(){
 		return this.size;
 	}
-	
+
 	public void setColor(Color color){
 		this.color=color;
 	}
 	public Color getColor(){
 		return this.color;
 	}
-	
+
 	public void setVelocityX(double d){
 		this.velX = d;
 	}
 	public double getVelocityX(){
 		return this.velX;
 	}
-	
+
 	public void setVelocityY(double d){
 		this.velY=d;
 	}
 	public double getVelocityY(){
 		return this.velY;
 	}
-	
+
 	public void setVelocityT(){
 		this.velT = Math.sqrt(this.velX*this.velX + this.velY * this.velY);
 	}
-	
+
 	public double getVelocityT(){
 		return this.velT;
 	}

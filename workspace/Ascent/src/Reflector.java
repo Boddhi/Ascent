@@ -4,12 +4,18 @@ import java.awt.geom.Point2D;
 
 public class Reflector {
 	public double x1, y1, x2, y2;
-	private Line2D.Double line = null;
-	private final Point2D.Double clickPoint;
-	private final Point2D.Double releasePoint;
-	private final double slope;
+	private Line2D.Double tempLine = null;
+	private Line2D.Double leftLine = null, topLine = null, rightLine = null, bottomLine = null;
+	private final Point2D.Double clickPoint, releasePoint;
+	private Point2D.Double endPoint;
+	private final Point2D.Double topLeftPoint;
+	private final Point2D.Double bottomLeftPoint;
+	private final Point2D.Double topRightPoint;
+	private final Point2D.Double bottomRightPoint;
+	private final double slope, recipSlope;
 	private boolean hitBall;
-	private int thickness = 6;
+	Graphics2D graphics;
+	private Line2D.Double [] lines = new Line2D.Double[3];
 
 	public Reflector(double x1, double y1, double x2, double y2) {
 		this.x1 = x1;
@@ -19,37 +25,49 @@ public class Reflector {
 		// System.out.println(x1);
 		this.clickPoint = new Point2D.Double(x1, y1);
 		this.releasePoint = new Point2D.Double(x2, y2);
+		this.endPoint = releasePoint;
 		this.slope = (y2 - y1) / (x2 - x1);
-
-		line = new Line2D.Double(clickPoint, releasePoint);
-		if (getLength(line) > 200) {
-			line = new Line2D.Double(clickPoint, getNewPoint(slope, clickPoint,
-					releasePoint));
+		this.recipSlope = -(x2 - x1) / (y2 - y1);
+		this.tempLine = new Line2D.Double(clickPoint, releasePoint);
+		if (getLength(tempLine) > 200) {
+			endPoint = getNewPoint(slope, clickPoint, releasePoint, 200);
 		}
+		this.topLeftPoint = getNewPoint(recipSlope, clickPoint, endPoint, -20);
+		this.bottomLeftPoint = getNewPoint(recipSlope, clickPoint, endPoint, 20);
+		this.topRightPoint = getNewPoint(recipSlope, endPoint, clickPoint, 20);
+		this.bottomRightPoint = getNewPoint(recipSlope, endPoint, clickPoint, -20);
+		this.leftLine = new Line2D.Double(topLeftPoint, bottomLeftPoint);
+		this.topLine = new Line2D.Double(topLeftPoint, topRightPoint);
+		this.rightLine = new Line2D.Double(topRightPoint, bottomRightPoint);
+		this.bottomLine = new Line2D.Double(bottomLeftPoint, bottomRightPoint);
+		lines = new Line2D.Double[]{leftLine, topLine, rightLine, bottomLine};
 	}
-	
-	public Reflector(double x1, double y1, double x2, double y2,int override) { //ignores length restraints, used for debugging purposes
-		this.x1 = x1;
-		this.y1 = y1;
-		this.x2 = x2;
-		this.y2 = y2;
-		// System.out.println(x1);
-		this.clickPoint = new Point2D.Double(x1, y1);
-		this.releasePoint = new Point2D.Double(x2, y2);
-		this.slope = (y2 - y1) / (x2 - x1);
-		line = new Line2D.Double(clickPoint, releasePoint);
-	}
+
+//	public Reflector(double x1, double y1, double x2, double y2,int override) { //ignores length restraints, used for debugging purposes
+//		this.x1 = x1;
+//		this.y1 = y1;
+//		this.x2 = x2;
+//		this.y2 = y2;
+//		// System.out.println(x1);
+//		this.clickPoint = new Point2D.Double(x1, y1);
+//		this.releasePoint = new Point2D.Double(x2, y2);
+//		this.slope = (y2 - y1) / (x2 - x1);
+//		this.topLeftPoint = 
+//		this.endPoint = getNewPoint(slope, clickPoint,
+//				releasePoint, 200);
+//		this.tempLine = new Line2D.Double(clickPoint, releasePoint);
+//	}
+
 
 	public static Point2D.Double getNewPoint(double slope,
-			Point2D.Double clickPoint, Point2D.Double releasePoint) {
-		int maxLength = 5;
+			Point2D.Double clickPoint, Point2D.Double releasePoint, int maxLength) {
 		double angle = Math.atan(slope) * 180 / Math.PI;
 		if (angle < 0) {
 			angle += 360;
 		}
-		double newPointX = (200 * Math.cos(Math.toRadians(angle)) + clickPoint
+		double newPointX = (maxLength * Math.cos(Math.toRadians(angle)) + clickPoint
 				.getX());
-		double newPointY = (200 * Math.sin(Math.toRadians(angle)) + clickPoint
+		double newPointY = (maxLength * Math.sin(Math.toRadians(angle)) + clickPoint
 				.getY());
 		if (releasePoint.getX() < clickPoint.getX()) {
 			double xDifference = newPointX - clickPoint.getX();
@@ -70,7 +88,7 @@ public class Reflector {
 				.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 		return length;
 	}
-	
+
 	public boolean isOutOfBounds() {
 		if (y1 > Game.HEIGHT - Game.scroll && y2 > Game.HEIGHT - Game.scroll) {
 			return true;
@@ -78,12 +96,10 @@ public class Reflector {
 		return false;
 	}
 
-	public Line2D getLine() {
-		return line;
-	}
-	
 	public void draw(Graphics2D graphics) {
-		graphics.draw(getLine());
+		for (Line2D.Double l : lines) {
+			graphics.draw(l);
+		}
 	}
 
 	public double getX1() {
@@ -92,7 +108,7 @@ public class Reflector {
 	public void setX1(int x1) {
 		this.x1 = x1;
 	}
-	
+
 	public double getY1() {
 		return y1;
 	}
@@ -113,11 +129,15 @@ public class Reflector {
 	public void setY2(int y2) {
 		this.y2 = y2;
 	}
-	
+
 	public void setHitBall(boolean hitBall){
 		this.hitBall = hitBall;
 	}
 	public boolean getHitBall(){
 		return hitBall;
+	}
+
+	public Line2D [] get() {
+		return lines;
 	}
 }
