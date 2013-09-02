@@ -14,7 +14,6 @@ public class Reflector {
 	private final Point2D.Double bottomRightPoint;
 	private final double slope, recipSlope;
 	private boolean hitBall;
-	Graphics2D graphics;
 	private Line2D.Double [] lines = new Line2D.Double[3];
 
 	public Reflector(double x1, double y1, double x2, double y2) {
@@ -43,24 +42,24 @@ public class Reflector {
 		lines = new Line2D.Double[]{leftLine, topLine, rightLine, bottomLine};
 	}
 
-//	public Reflector(double x1, double y1, double x2, double y2,int override) { //ignores length restraints, used for debugging purposes
-//		this.x1 = x1;
-//		this.y1 = y1;
-//		this.x2 = x2;
-//		this.y2 = y2;
-//		// System.out.println(x1);
-//		this.clickPoint = new Point2D.Double(x1, y1);
-//		this.releasePoint = new Point2D.Double(x2, y2);
-//		this.slope = (y2 - y1) / (x2 - x1);
-//		this.topLeftPoint = 
-//		this.endPoint = getNewPoint(slope, clickPoint,
-//				releasePoint, 200);
-//		this.tempLine = new Line2D.Double(clickPoint, releasePoint);
-//	}
+/*	public Reflector(double x1, double y1, double x2, double y2,int override) { //ignores length restraints, used for debugging purposes
+		this.x1 = x1;
+		this.y1 = y1;
+		this.x2 = x2;
+		this.y2 = y2;
+		// System.out.println(x1);
+		this.clickPoint = new Point2D.Double(x1, y1);
+		this.releasePoint = new Point2D.Double(x2, y2);
+		this.slope = (y2 - y1) / (x2 - x1);
+		this.topLeftPoint = 
+		this.endPoint = getNewPoint(slope, clickPoint,
+				releasePoint, 200);
+		this.tempLine = new Line2D.Double(clickPoint, releasePoint);
+	}
+*/
 
-
-	public static Point2D.Double getNewPoint(double slope,
-			Point2D.Double clickPoint, Point2D.Double releasePoint, int maxLength) {
+	public static Point2D.Double getNewPoint(double slope, Point2D.Double clickPoint, Point2D.Double releasePoint, int maxLength) {
+		
 		double angle = Math.atan(slope) * 180 / Math.PI;
 		if (angle < 0) {
 			angle += 360;

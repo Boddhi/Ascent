@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Polygon;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 
@@ -34,7 +35,16 @@ public class Ball {
 		Ellipse2D.Double e = new Ellipse2D.Double(x, y, size, size);
 		return e;
 	}
-
+	public Polygon getPolygon(){
+		
+		//int x1 = (int)(x+velX), y1 = (int)(y+velY);'
+		int x1 = x, y1 = y;
+		int[] xPoints = {(int)x1, (int)(x1+size*0.3), (int)(x1+size*0.7),(int)(x1+size), (int)(x1+size), (int)(x1+size*0.7), (int)(x1+size*0.3), (int)x1};
+		int[] yPoints = {(int)(y1+size*0.3), (int)y1, (int)y1, (int)(y1+size*0.3), (int)(y1+size*0.7),(int)(y1+size),(int)(y1+size),(int)(y1+size*0.7)};
+		
+		Polygon poly = new Polygon(xPoints, yPoints, 8);
+		return poly;
+	}
 	public Line2D[] getLines(){
 		int x1 = (int)(x-velX), y1 = (int)(y-velY);
 		int[] xPoints = {(int)x1, (int)(x1+size*0.3), (int)(x1+size*0.7),(int)(x1+size), (int)(x1+size), (int)(x1+size*0.7), (int)(x1+size*0.3), (int)x1};

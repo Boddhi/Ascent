@@ -297,62 +297,85 @@ public class Game extends Canvas implements Runnable {
 		}
 		// System.out.println(walls.size());
 	}
-
 	public void updateBall() {
-		ball.live();
-		// System.out.println(ball.getVelocityX() + " " + ball.getVelocityY());
-		calculateBounce();
-	}
-
-	public void calculateBounce() {
-		// Angles are configured the following way:
-		/*
-		 * 180 deg ^ 270 deg < > 90 deg v 0/360 deg
-		 */
-		double totalV = ball.getVelocityT();
-		double ballAngle, wallAngle = 0, ballSlope = 0, wallSlope = 0, theta;
-		if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0)
-			ballAngle = 180;
-		else if (ball.getVelocityX() == 0 && ball.getVelocityY() > 0)
-			ballAngle = 0;
-		else if (ball.getVelocityY() == 0 && ball.getVelocityX() > 0)
-			ballAngle = 90;
-		else if (ball.getVelocityY() == 0)
-			ballAngle = 270;
-		else {
-			ballSlope = ball.getVelocityX() / ball.getVelocityY();
-			if (ball.getVelocityY() < 0) {
-				ballAngle = 180 + Math.toDegrees(Math.atan(ballSlope));
-				// System.out.println("A");
-			} else {
-				ballAngle = Math.toDegrees(Math.atan(ballSlope));
-				// System.out.println("B");
+		  ball.live();
+		  // System.out.println(ball.getVelocityX() + " " + ball.getVelocityY());
+			for (int i = 0; i < walls.size(); i++) {
+				collision(walls.get(i), ball, i);
 			}
+		 }
+		public void collision(Reflector reflector, Ball ball, int index) {
+		  // if(b.getEllipse().intersects(r.getLine().getBounds2D())){ //seems
+		  // unnecessary
+			 //that was put in there to speed up code. basically why run two nested for loops for objects miles apart.(if speeed ever becomes a problem) - Vanshil
+			Line2D[] ballLines = ball.getLines();
+			Line2D[] reflectorLines = reflector.get();
+			for (int i = 0; i < reflectorLines.length; i++) {
+				for (int j = 0; j < 8; j++) {
+					if (reflectorLines[i].intersectsLine(ballLines[j])) {
+						calculateBounce(reflectorLines[i]);
+						wallsHit(index);
+					}
+				}
+			}
+		
 		}
-		for (int i = 0; i < walls.size(); i++) {
-			if (walls.get(i).getY2() == walls.get(i).getY1())
-				wallAngle = 90;
-			else if (walls.get(i).getX2() == walls.get(i).getX1())
-				wallAngle = 180;
+		
+		public void calculateBounce(Line2D reflectorLine) {
+		  // Angles are configured the following way:
+		  /*
+		   * 180 deg ^ 270 deg < > 90 deg v 0/360 deg
+		   */
+			double totalV = ball.getVelocityT();
+			double ballAngle, wallAngle = 0, ballSlope = 0, wallSlope = 0, theta;
+			
+			if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0)
+				ballAngle = 180;
+			else if (ball.getVelocityX() == 0 && ball.getVelocityY() > 0)
+				ballAngle = 0;
+			else if (ball.getVelocityY() == 0 && ball.getVelocityX() > 0)
+				ballAngle = 90;
+			else if (ball.getVelocityY() == 0)
+				ballAngle = 270;
 			else {
-				wallSlope = (((double) (walls.get(i).getX2() - walls.get(i)
-						.getX1()) / (double) (walls.get(i).getY2() - walls.get(
-						i).getY1())));
+				ballSlope = ball.getVelocityX() / ball.getVelocityY();
+				if (ball.getVelocityY() < 0) {
+					ballAngle = 180 + Math.toDegrees(Math.atan(ballSlope));
+					// System.out.println("A");
+				} else {
+					ballAngle = Math.toDegrees(Math.atan(ballSlope));
+					// System.out.println("B");
+				}
+		  }
+		//for (int i = 0; i < walls.size(); i++) {
+			graphics.setColor(Color.black);
+			graphics.draw(reflectorLine);
+			double x1 = reflectorLine.getX1(), y1 = reflectorLine.getY1(), x2 = reflectorLine.getX2(), y2 = reflectorLine.getY2();
+			if (y2 == y1){
+				wallAngle = 90;
+			}
+			else if (x2 == x1){
+				wallAngle = 180;
+			}
+			else {
+				wallSlope = (x2 - x1) / (y2 - y1);
 				wallAngle = Math.toDegrees(Math.atan(wallSlope));
 			}
+			
 			theta = (ballAngle + 2 * (wallAngle - ballAngle));
 			theta = Math.toRadians(theta);
-			if (collision(walls.get(i), ball) && !(walls.get(i).getHitBall())) {
-				// System.out.println("ball angle: " + ballAngle +
-				// " wallAngle: " + wallAngle + " theta: " +
-				// Math.toDegrees(theta));
-				ball.setVelocityX(Math.sin(theta) * totalV);
-				ball.setVelocityY(Math.cos(theta) * totalV);
-				wallsHit(i);
-			}
-		}
-	}
 
+			// System.out.println("ball angle: " + ballAngle +
+			// " wallAngle: " + wallAngle + " theta: " +
+			// Math.toDegrees(theta));
+			ball.setVelocityX(Math.sin(theta) * totalV);
+			ball.setVelocityY(Math.cos(theta) * totalV);
+			
+			//System.out.println("(" + reflectorLine.getX1() + ", " + reflectorLine.getY1() + ")" + "(" + reflectorLine.getX2() + ", " + reflectorLine.getY2() + ")");
+			
+		//}
+	}
+	
 	public void wallsHit(int i) {
 		for (int j = 0; j < walls.size(); j++) {
 			Reflector r = walls.get(j);
@@ -365,24 +388,7 @@ public class Game extends Canvas implements Runnable {
 		}
 	}
 
-	public boolean collision(Reflector reflector, Ball ball) {
-		// if(b.getEllipse().intersects(r.getLine().getBounds2D())){ //seems
-		// unnecessary
-		Line2D[] l = ball.getLines();
-		Line2D[] reflectorLines = reflector.get();
-		for (int i = 0; i < reflectorLines.length; i++) {
-
-			for (int j = 0; j < 8; j++) {
-				if (reflectorLines[i].intersectsLine(l[j])) {
-					return true;
-				}
-			}
-		}
-		// }
-		return false;
-	}
-
-	public void updatePauseBar() {
+		public void updatePauseBar() {
 		// k.changePausedStates();
 		if (enterPressed) {
 			reset = GAME_PAUSE;
@@ -476,142 +482,137 @@ public class Game extends Canvas implements Runnable {
 		}
 	}
 
-	public void drawMenu() {
-		drawBackground(Color.black);
-		playButton.draw(graphics);
-		helpButton.draw(graphics);
-		quitButton.draw(graphics);
-	}
-
-	public void drawInstructions() {
-		drawBackground(Color.red);
-		header.drawControls(graphics);
-
-	}
-
-	public void drawHighscoreScreen() {
-
-	}
-
-	public void drawTimeHighscore(Vector<Score> v, int x) {
-		for (int i = 0; i < v.size(); i++) {
-			writeText(Color.cyan, 30, v.elementAt(i).toString(), x,
-					(40 * i) + 100);
+		public void drawMenu() {
+			drawBackground(Color.black);
+			playButton.draw(graphics);
+			helpButton.draw(graphics);
+			quitButton.draw(graphics);
 		}
-	}
-
-	public void drawScoreHighscore(Vector<Score> v, int x) {
-		for (int i = v.size() - 1; i > 0; i--) {
-			writeText(Color.cyan, 30, v.elementAt(i).toString(), x,
-					(40 * ((v.size() - i) - 1)) + 100);
+	
+		public void drawInstructions() {
+			drawBackground(Color.red);
+			header.drawControls(graphics);
+	
 		}
-	}
-
-	public void drawGamePlay() {
-
-		drawBackground(Color.gray);
-		graphics.translate(0, scroll);
-		Double slope = (mm.y - m.y1) / (mm.x - m.x1);
-		Point2D.Double clickPoint = new Point2D.Double(m.x1, m.y1);
-		Point2D.Double cursorPoint = new Point2D.Double(mm.x, mm.y);
-		Line2D.Double line = new Line2D.Double(clickPoint, cursorPoint);
-
-		if (m.holding) {
-
-			graphics.setColor(Color.black);
-			if (getLength(line) > 200) {
-				line = new Line2D.Double(clickPoint, getNewPoint(slope,
-						clickPoint, cursorPoint));
+	
+		public void drawHighscoreScreen() {
+	
+		}
+			public void drawTimeHighscore(Vector<Score> v, int x) {
+			for (int i = 0; i < v.size(); i++) {
+				writeText(Color.cyan, 30, v.elementAt(i).toString(), x,
+						(40 * i) + 100);
 			}
-			graphics.draw(line);
 		}
-		drawWalls();
-		drawBall();
-		// System.out.println(mm.x + ", " + mm.y);
-	}
-
-	private Point2D.Double getNewPoint(double slope, Point2D.Double clickPoint,
-			Point2D.Double releasePoint) {
-		int maxLength = 200;
-		double angle = Math.atan(slope) * 180 / Math.PI;
-		if (angle < 0) {
-			angle += 360;
+			public void drawScoreHighscore(Vector<Score> v, int x) {
+			for (int i = v.size() - 1; i > 0; i--) {
+				writeText(Color.cyan, 30, v.elementAt(i).toString(), x,
+						(40 * ((v.size() - i) - 1)) + 100);
+			}
 		}
-		double newPointX = (maxLength * Math.cos(Math.toRadians(angle)) + clickPoint
-				.getX());
-		double newPointY = (maxLength * Math.sin(Math.toRadians(angle)) + clickPoint
-				.getY());
-		if (releasePoint.getX() < clickPoint.getX()) {
-			double xDifference = newPointX - clickPoint.getX();
-			newPointX = clickPoint.getX() - xDifference;
-			double yDifference = newPointY - clickPoint.getY();
-			newPointY = clickPoint.getY() - yDifference;
+	
+		public void drawGamePlay() {
+	
+			drawBackground(Color.gray);
+			graphics.translate(0, scroll);
+			Double slope = (mm.y - m.y1) / (mm.x - m.x1);
+			Point2D.Double clickPoint = new Point2D.Double(m.x1, m.y1);
+			Point2D.Double cursorPoint = new Point2D.Double(mm.x, mm.y);
+			Line2D.Double line = new Line2D.Double(clickPoint, cursorPoint);
+	
+			if (m.holding) {
+	
+				graphics.setColor(Color.black);
+				if (getLength(line) > 200) {
+					line = new Line2D.Double(clickPoint, getNewPoint(slope,
+							clickPoint, cursorPoint));
+				}
+				graphics.draw(line);
+			}
+			drawWalls();
+			drawBall();
+			// System.out.println(mm.x + ", " + mm.y);
 		}
-		Point2D.Double newPoint = new Point2D.Double(newPointX, newPointY);
-		return newPoint;
-	}
-
-	private double getLength(Line2D.Double line) {
-		double x1 = line.getX1();
-		double x2 = line.getX2();
-		double y1 = line.getY1();
-		double y2 = line.getY2();
-		double length = Math
-				.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-		return length;
-	}
-
-	public void drawWalls() {
-
-		for (int i = 0; i < walls.size(); i++) {
-			// System.out.println(i);
-			graphics.setColor(Color.cyan);
-			// System.out.println(i);
-			walls.get(i).draw(graphics);
+			private Point2D.Double getNewPoint(double slope, Point2D.Double clickPoint,
+				Point2D.Double releasePoint) {
+			int maxLength = 200;
+			double angle = Math.atan(slope) * 180 / Math.PI;
+			if (angle < 0) {
+				angle += 360;
+			}
+			double newPointX = (maxLength * Math.cos(Math.toRadians(angle)) + clickPoint
+					.getX());
+			double newPointY = (maxLength * Math.sin(Math.toRadians(angle)) + clickPoint
+					.getY());
+			if (releasePoint.getX() < clickPoint.getX()) {
+				double xDifference = newPointX - clickPoint.getX();
+				newPointX = clickPoint.getX() - xDifference;
+				double yDifference = newPointY - clickPoint.getY();
+				newPointY = clickPoint.getY() - yDifference;
+			}
+			Point2D.Double newPoint = new Point2D.Double(newPointX, newPointY);
+			return newPoint;
 		}
-	}
-
-	public void drawBall() {
-		graphics.setColor(ball.getColor());
-		graphics.fill(ball.getEllipse());
-		// System.out.println("ran");
-	}
-
-	public void drawBackground(Color c) {
-		graphics.setColor(c);
-		graphics.fillRect(0, 0, WIDTH, HEIGHT);
-	}
-
-	public void drawScore() {
-		String text = score + "";
-		writeText(Color.orange, 40, text, 0, 30);
-	}
-
-	public void drawTime() {
-		Double time = (double) (t / 6) / 10;
-		String text = time.toString();
-		writeText(Color.orange, 40, text, 400, 30);
-	}
-
-	public void drawPlayer() {
-
-	}
-
-	public void drawPauseBar(boolean one) {
-		/*
-		 * int pausedBarX = (WIDTH/2)+100; int y0 = 60, y1 = 120, y2 = 180, y3 =
-		 * 240, y4 = 300; int textSize = 40; int add = 10; //
-		 * System.out.println(GAME_STATE); if (one){ add = 0;
-		 * writeText(Color.orange, textSize+20, "GAME PAUSED", WIDTH/2, y0); }
-		 */
-		header.drawPause(graphics);
-	}
-
-	public void writeText(Color c, int size, String text, int x, int y) {
-		graphics.setColor(c);
-		graphics.setFont(new Font("Arial", Font.PLAIN, size));
-		graphics.drawString(text, x, y);
-	}
+			private double getLength(Line2D.Double line) {
+			double x1 = line.getX1();
+			double x2 = line.getX2();
+			double y1 = line.getY1();
+			double y2 = line.getY2();
+			double length = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+			return length;
+		}
+			public void drawWalls() {
+	
+			for (int i = 0; i < walls.size(); i++) {
+				// System.out.println(i);
+				graphics.setColor(Color.cyan);
+				// System.out.println(i);
+				walls.get(i).draw(graphics);
+			}
+		}
+			public void drawBall() {
+			graphics.setColor(ball.getColor());
+			graphics.fill(ball.getEllipse());
+			graphics.setColor(Color.black);
+			graphics.draw(ball.getPolygon());
+			// System.out.println("ran");
+		}
+	
+		public void drawBackground(Color c) {
+			graphics.setColor(c);
+			graphics.fillRect(0, 0, WIDTH, HEIGHT);
+		}
+	
+		public void drawScore() {
+			String text = score + "";
+			writeText(Color.orange, 40, text, 0, 30);
+		}
+	
+		public void drawTime() {
+			Double time = (double) (t / 6) / 10;
+			String text = time.toString();
+			writeText(Color.orange, 40, text, 400, 30);
+		}
+	
+		public void drawPlayer() {
+	
+		}
+	
+		public void drawPauseBar(boolean one) {
+			/*
+			 * int pausedBarX = (WIDTH/2)+100; int y0 = 60, y1 = 120, y2 = 180, y3 =
+			 * 240, y4 = 300; int textSize = 40; int add = 10; //
+			 * System.out.println(GAME_STATE); if (one){ add = 0;
+			 * writeText(Color.orange, textSize+20, "GAME PAUSED", WIDTH/2, y0); }
+			 */
+			header.drawPause(graphics);
+		}
+	
+		public void writeText(Color c, int size, String text, int x, int y) {
+			graphics.setColor(c);
+			graphics.setFont(new Font("Arial", Font.PLAIN, size));
+			graphics.drawString(text, x, y);
+		}
 
 	/*
 	 * public void drawWriteHighscore(){ drawBackground(); drawScore();
