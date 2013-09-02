@@ -7,6 +7,7 @@ public class Ball {
 	private int x, y;
 	private int size;
 	private double velX = 0, velY = -5, velT; //should un-hardcode this soon
+	private boolean isColliding;
 	private Color color;
 
 	public Ball(int x, int y, int size, Color color){
@@ -88,6 +89,15 @@ public class Ball {
 	public Color getColor(){
 		return this.color;
 	}
+	
+	public void setIsColliding(Boolean isColliding){
+		this.isColliding = isColliding;
+	}
+	
+	public boolean getIsColliding() {
+		return isColliding;
+	}
+	
 
 	public void setVelocityX(double d){
 		this.velX = d;

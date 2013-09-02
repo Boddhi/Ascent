@@ -1,4 +1,6 @@
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
@@ -13,8 +15,8 @@ public class Reflector {
 	private final Point2D.Double topRightPoint;
 	private final Point2D.Double bottomRightPoint;
 	private final double slope, recipSlope;
-	private boolean hitBall;
-	private Line2D.Double [] lines = new Line2D.Double[3];
+	private boolean hitBall = false;
+	private Line2D.Double [] lines = new Line2D.Double[4];
 
 	public Reflector(double x1, double y1, double x2, double y2) {
 		this.x1 = x1;
@@ -95,6 +97,17 @@ public class Reflector {
 		return false;
 	}
 
+	public boolean contains(Point2D point) {
+		boolean contains = false;
+		int [] xPoints = {(int) topLeftPoint.getX(), (int) topRightPoint.getX(), (int) bottomRightPoint.getX(), (int) bottomLeftPoint.getX()}; 
+		int [] yPoints = {(int) topLeftPoint.getY(), (int) topRightPoint.getY(), (int) bottomRightPoint.getY(), (int) bottomLeftPoint.getY()};
+		Polygon reflectorPoly = new Polygon(xPoints, yPoints, 4);
+		if (reflectorPoly.contains(point)){
+			contains = true;
+		}
+		return contains;
+	}
+	
 	public void draw(Graphics2D graphics) {
 		for (Line2D.Double l : lines) {
 			graphics.draw(l);

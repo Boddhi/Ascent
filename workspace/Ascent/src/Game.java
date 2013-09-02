@@ -297,56 +297,83 @@ public class Game extends Canvas implements Runnable {
 		}
 		// System.out.println(walls.size());
 	}
+
 	public void updateBall() {
-		  ball.live();
-		  // System.out.println(ball.getVelocityX() + " " + ball.getVelocityY());
-			for (int i = 0; i < walls.size(); i++) {
-				collision(walls.get(i), ball, i);
-			}
-		 }
-		public void collision(Reflector reflector, Ball ball, int index) {
-		  // if(b.getEllipse().intersects(r.getLine().getBounds2D())){ //seems
-		  // unnecessary
-			 //that was put in there to speed up code. basically why run two nested for loops for objects miles apart.(if speeed ever becomes a problem) - Vanshil
-			Line2D[] ballLines = ball.getLines();
-			Line2D[] reflectorLines = reflector.get();
-			for (int i = 0; i < reflectorLines.length; i++) {
-				for (int j = 0; j < 8; j++) {
-					if (reflectorLines[i].intersectsLine(ballLines[j])) {
-						calculateBounce(reflectorLines[i]);
-						wallsHit(index);
-					}
-				}
-			}
-		
+		ball.live();
+		// System.out.println(ball.getVelocityX() + " " + ball.getVelocityY());
+		for (int i = 0; i < walls.size(); i++) {
+			collision(walls.get(i), ball, i);
 		}
+	}
+
+	public void collision(Reflector reflector, Ball ball, int index) {
+		// if (ball.getEllipse().intersects(rl.getBounds()){ //seems
+		// unnecessary
+		// that was put in there to speed up code. basically why run two nested
+		// for loops for objects miles apart.(if speeed ever becomes a problem)
+		// - Vanshil
+		Line2D[] ballLines = ball.getLines();
+		Line2D[] reflectorLines = reflector.get();
 		
-		public void calculateBounce(Line2D reflectorLine) {
-		  // Angles are configured the following way:
-		  /*
-		   * 180 deg ^ 270 deg < > 90 deg v 0/360 deg
-		   */
-			double totalV = ball.getVelocityT();
-			double ballAngle, wallAngle = 0, ballSlope = 0, wallSlope = 0, theta;
-			
-			if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0)
-				ballAngle = 180;
-			else if (ball.getVelocityX() == 0 && ball.getVelocityY() > 0)
-				ballAngle = 0;
-			else if (ball.getVelocityY() == 0 && ball.getVelocityX() > 0)
-				ballAngle = 90;
-			else if (ball.getVelocityY() == 0)
-				ballAngle = 270;
-			else {
-				ballSlope = ball.getVelocityX() / ball.getVelocityY();
-				if (ball.getVelocityY() < 0) {
-					ballAngle = 180 + Math.toDegrees(Math.atan(ballSlope));
-					// System.out.println("A");
-				} else {
-					ballAngle = Math.toDegrees(Math.atan(ballSlope));
-					// System.out.println("B");
+//		for (Line2D rl : reflectorLines) {
+//			for (int j = 0; j < 8; j++) {
+//				if (rl.intersectsLine(ballLines[j]) && !ball.getIsColliding() ) {
+//						calculateBounce(rl);
+//						ball.setIsColliding(true);
+//
+//				}
+//			}
+//		}
+		
+		int lineCount = 0;
+		for (Line2D rl : reflectorLines) {
+			for (int j = 0; j < 8; j++) {
+				if (reflector.contains(ballLines[j].getP1())
+						&& reflector.contains(ballLines[j].getP2())) {
+					lineCount++;
+					System.out.println(lineCount);
+				} else if (rl.intersectsLine(ballLines[j])
+						&& !ball.getIsColliding()) {
+					calculateBounce(rl);
+					ball.setIsColliding(true);
 				}
-		  }
+			}
+		}
+		if (lineCount == 0) {
+			ball.setIsColliding(false);
+		} else {
+			ball.setIsColliding(true);
+		}
+
+	}
+
+	public void calculateBounce(Line2D reflectorLine) {
+		System.out.println("calculating bounce");
+		// Angles are configured the following way:
+		/*
+		 * 180 deg ^ 270 deg < > 90 deg v 0/360 deg
+		 */
+		double totalV = ball.getVelocityT();
+		double ballAngle, wallAngle = 0, ballSlope = 0, wallSlope = 0, theta;
+
+		if (ball.getVelocityX() == 0 && ball.getVelocityY() < 0)
+			ballAngle = 180;
+		else if (ball.getVelocityX() == 0 && ball.getVelocityY() > 0)
+			ballAngle = 0;
+		else if (ball.getVelocityY() == 0 && ball.getVelocityX() > 0)
+			ballAngle = 90;
+		else if (ball.getVelocityY() == 0)
+			ballAngle = 270;
+		else {
+			ballSlope = ball.getVelocityX() / ball.getVelocityY();
+			if (ball.getVelocityY() < 0) {
+				ballAngle = 180 + Math.toDegrees(Math.atan(ballSlope));
+				// System.out.println("A");
+			} else {
+				ballAngle = Math.toDegrees(Math.atan(ballSlope));
+				// System.out.println("B");
+			}
+		}
 		//for (int i = 0; i < walls.size(); i++) {
 			graphics.setColor(Color.black);
 			graphics.draw(reflectorLine);
@@ -365,9 +392,11 @@ public class Game extends Canvas implements Runnable {
 			theta = (ballAngle + 2 * (wallAngle - ballAngle));
 			theta = Math.toRadians(theta);
 
-			// System.out.println("ball angle: " + ballAngle +
-			// " wallAngle: " + wallAngle + " theta: " +
-			// Math.toDegrees(theta));
+
+			 System.out.println("ball angle: " + ballAngle +
+			 " wallAngle: " + wallAngle + " theta: " +
+			 Math.toDegrees(theta));
+			 
 			ball.setVelocityX(Math.sin(theta) * totalV);
 			ball.setVelocityY(Math.cos(theta) * totalV);
 			
