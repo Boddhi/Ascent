@@ -35,6 +35,8 @@ public class Game extends Canvas implements Runnable {
 	// game updates per second
 	static final int UPS = 60;
 	static int t = 0;
+	
+	static int scrollSpeed = 1;
 
 	// variables for the thread
 	private Thread thread;
@@ -282,7 +284,7 @@ public class Game extends Canvas implements Runnable {
 	}
 
 	public void updateWalls() {
-		scroll++;
+		scroll+=scrollSpeed;
 		Reflector r = m.getReflector();
 		if (r != null) {
 			walls.add(r);
@@ -299,6 +301,12 @@ public class Game extends Canvas implements Runnable {
 	}
 	public void updateBall() {
 		  ball.live();
+		  if(ball.getY() <= 50-scroll){
+			  scrollSpeed = -((int)ball.getVelocityY()-2);
+		  }
+		  if(ball.getY() > 700-scroll){
+			  scrollSpeed = 1;
+		  }
 		  // System.out.println(ball.getVelocityX() + " " + ball.getVelocityY());
 			for (int i = 0; i < walls.size(); i++) {
 				collision(walls.get(i), ball, i);
@@ -510,7 +518,7 @@ public class Game extends Canvas implements Runnable {
 						(40 * ((v.size() - i) - 1)) + 100);
 			}
 		}
-
+			
 		public void drawGamePlay() {
 
 			drawBackground(Color.gray);

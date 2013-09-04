@@ -49,7 +49,7 @@ public class Reflector {
 		lines = new Line2D.Double[]{leftLine, topLine, rightLine, bottomLine};
 		
 		try{
-			this.reflectorImage = ImageIO.read(new File("Reflector.png"));
+			this.reflectorImage = ImageIO.read(new File("images\\Reflector.png"));
 		}
 		catch (IOException e) {
 			e.printStackTrace();
