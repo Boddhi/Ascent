@@ -7,7 +7,6 @@ public class Ball {
 	private int x, y;
 	private int size;
 	private double velX = 0, velY = -5, velT; //should un-hardcode this soon
-	private boolean isColliding;
 	private Color color;
 
 	public Ball(int x, int y, int size, Color color){
@@ -37,12 +36,12 @@ public class Ball {
 		return e;
 	}
 	public Polygon getPolygon(){
-		
+
 		//int x1 = (int)(x+velX), y1 = (int)(y+velY);'
 		int x1 = x, y1 = y;
 		int[] xPoints = {(int)x1, (int)(x1+size*0.3), (int)(x1+size*0.7),(int)(x1+size), (int)(x1+size), (int)(x1+size*0.7), (int)(x1+size*0.3), (int)x1};
 		int[] yPoints = {(int)(y1+size*0.3), (int)y1, (int)y1, (int)(y1+size*0.3), (int)(y1+size*0.7),(int)(y1+size),(int)(y1+size),(int)(y1+size*0.7)};
-		
+
 		Polygon poly = new Polygon(xPoints, yPoints, 8);
 		return poly;
 	}
@@ -89,15 +88,6 @@ public class Ball {
 	public Color getColor(){
 		return this.color;
 	}
-	
-	public void setIsColliding(Boolean isColliding){
-		this.isColliding = isColliding;
-	}
-	
-	public boolean getIsColliding() {
-		return isColliding;
-	}
-	
 
 	public void setVelocityX(double d){
 		this.velX = d;

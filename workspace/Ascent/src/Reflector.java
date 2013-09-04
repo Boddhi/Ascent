@@ -1,8 +1,12 @@
 import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Polygon;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 public class Reflector {
 	public double x1, y1, x2, y2;
@@ -15,9 +19,10 @@ public class Reflector {
 	private final Point2D.Double topRightPoint;
 	private final Point2D.Double bottomRightPoint;
 	private final double slope, recipSlope;
-	private boolean hitBall = false;
-	private Line2D.Double [] lines = new Line2D.Double[4];
-
+	private boolean hitBall;
+	private Line2D.Double [] lines = new Line2D.Double[3];
+	private BufferedImage reflectorImage = null;
+		
 	public Reflector(double x1, double y1, double x2, double y2) {
 		this.x1 = x1;
 		this.y1 = y1;
@@ -42,6 +47,15 @@ public class Reflector {
 		this.rightLine = new Line2D.Double(topRightPoint, bottomRightPoint);
 		this.bottomLine = new Line2D.Double(bottomLeftPoint, bottomRightPoint);
 		lines = new Line2D.Double[]{leftLine, topLine, rightLine, bottomLine};
+		
+		try{
+			this.reflectorImage = ImageIO.read(new File("Reflector.png"));
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		reflectorImage = reflectorImage.getSubimage(0, 0,
+				(int) getLength(topLine), 40);
 	}
 
 /*	public Reflector(double x1, double y1, double x2, double y2,int override) { //ignores length restraints, used for debugging purposes
@@ -61,7 +75,7 @@ public class Reflector {
 */
 
 	public static Point2D.Double getNewPoint(double slope, Point2D.Double clickPoint, Point2D.Double releasePoint, int maxLength) {
-		
+
 		double angle = Math.atan(slope) * 180 / Math.PI;
 		if (angle < 0) {
 			angle += 360;
@@ -97,21 +111,38 @@ public class Reflector {
 		return false;
 	}
 
-	public boolean contains(Point2D point) {
-		boolean contains = false;
-		int [] xPoints = {(int) topLeftPoint.getX(), (int) topRightPoint.getX(), (int) bottomRightPoint.getX(), (int) bottomLeftPoint.getX()}; 
-		int [] yPoints = {(int) topLeftPoint.getY(), (int) topRightPoint.getY(), (int) bottomRightPoint.getY(), (int) bottomLeftPoint.getY()};
-		Polygon reflectorPoly = new Polygon(xPoints, yPoints, 4);
-		if (reflectorPoly.contains(point)){
-			contains = true;
-		}
-		return contains;
-	}
-	
 	public void draw(Graphics2D graphics) {
-		for (Line2D.Double l : lines) {
-			graphics.draw(l);
+//		for (Line2D.Double l : lines) {'
+//			graphics.draw(l);
+//		}
+
+		
+		double angle = Math.atan(slope) * 180 / Math.PI;
+		if (angle < 0) {
+			angle += 360;
 		}
+
+		double rotateAt = Math.toRadians(angle);
+
+		AffineTransform at = new AffineTransform();
+
+		if (clickPoint.getX() < releasePoint.getX()) {
+			if (slope > 0) {
+				at.translate(bottomLeftPoint.getX(), bottomLeftPoint.getY());
+			} else {
+				at.translate(topLeftPoint.getX(), topLeftPoint.getY());
+			}
+		} else {
+			if (slope < 0) {
+				at.translate(bottomRightPoint.getX(), bottomRightPoint.getY());
+			} else {
+				at.translate(topRightPoint.getX(), topRightPoint.getY());
+			}
+		}
+		at.rotate(rotateAt);
+		
+//		at.translate(-reflectorImage.getWidth()/2, -reflectorImage.getHeight()/2);
+		graphics.drawImage(reflectorImage, at, null);
 	}
 
 	public double getX1() {
