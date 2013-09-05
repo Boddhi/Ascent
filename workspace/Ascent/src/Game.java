@@ -37,6 +37,7 @@ public class Game extends Canvas implements Runnable {
 	static int t = 0;
 	
 	static int scrollSpeed = 1;
+	static double ballXSpeed=-100,ballYSpeed;
 
 	// variables for the thread
 	private Thread thread;
@@ -302,10 +303,17 @@ public class Game extends Canvas implements Runnable {
 	public void updateBall() {
 		  ball.live();
 		  if(ball.getY() <= 50-scroll){
-			  scrollSpeed = -((int)ball.getVelocityY()-2);
+			  scrollSpeed = -((int)ball.getVelocityY());
+			  ballXSpeed = ball.getVelocityX();
+			  ballYSpeed = ball.getVelocityY();
+			  ball.setVelocityX(0);
+			  ball.setVelocityY(0);
 		  }
-		  if(ball.getY() > 700-scroll){
+		  if(ball.getY() > 500-scroll && ballXSpeed > -100){
 			  scrollSpeed = 1;
+			  ball.setVelocityX(ballXSpeed);
+			  ball.setVelocityY(ballYSpeed);
+			  ballXSpeed = -100;
 		  }
 		  // System.out.println(ball.getVelocityX() + " " + ball.getVelocityY());
 			for (int i = 0; i < walls.size(); i++) {
