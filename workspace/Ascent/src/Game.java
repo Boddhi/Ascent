@@ -66,7 +66,7 @@ public class Game extends Canvas implements Runnable {
 	BufferedImage backgroundImg = null;
 	BufferedImage menuBackgroundImg = null;
 	BufferedImage logo = null;
-	public static boolean jar = false; // this variable lets the code know
+	public static boolean jar = true; // this variable lets the code know
 										// whether its being run in eclipse or
 										// not thus avoiding image loading
 										// errors. Without this we wouldnt be
@@ -76,12 +76,9 @@ public class Game extends Canvas implements Runnable {
 	// Menu Variables
 	double rateAverage = 0;
 	// Menu buttons
-	private MenuButton playButton = new MenuButton(225, 200, 356, 161,
-			"PlayButton.png");
-	private MenuButton helpButton = new MenuButton(250, 420, 300, 150,
-			"HelpButton.png");
-	private MenuButton quitButton = new MenuButton(250, 600, 300, 150,
-			"QuitButton.png");
+	private MenuButton playButton = new MenuButton(225, 200, 356, 161, "PlayButton.png");
+	private MenuButton helpButton = new MenuButton(250, 420, 300, 150, "HelpButton.png");
+	private MenuButton quitButton = new MenuButton(250, 600, 300, 150, "QuitButton.png");
 	private MenuButton[] menuButtons = { playButton, helpButton, quitButton };
 
 	// Instruction Screen Variables
