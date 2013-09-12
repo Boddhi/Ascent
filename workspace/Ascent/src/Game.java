@@ -333,21 +333,45 @@ public class Game extends Canvas implements Runnable {
 	public void collision(Reflector reflector, Ball ball, int index) {
 		// if(b.getEllipse().intersects(r.getLine().getBounds2D())){ //seems
 		// unnecessary
-		// that was put in there to speed up code. basically why run two nested
-		// for loops for objects miles apart.(if speeed ever becomes a problem)
-		// - Vanshil
+		//that was put in there to speed up code. basically why run two nested for loops for objects miles apart.(if speeed ever becomes a problem) - Vanshil
 		Line2D[] ballLines = ball.getLines();
 		Line2D[] reflectorLines = reflector.get();
+		int k=0,last=-1;
+		boolean hit = false;
 		for (int i = 0; i < reflectorLines.length; i++) {
 			for (int j = 0; j < 8; j++) {
-				if (reflectorLines[i].intersectsLine(ballLines[j])
-						&& !(reflectors.get(index).getHitBall())) {
-					calculateBounce(reflectorLines[i]);
-					wallsHit(index);
+				if (reflectorLines[i].intersectsLine(ballLines[j])) {
+
+				}
+				if (reflectorLines[i].intersectsLine(ballLines[j]) && !(reflectors.get(index).getHitBall())) {
+					hit = true;
+					//	calculateBounce(reflectorLines[i]);
+					//	wallsHit(index);
+					//	ball.live();
+					//	ball.live();
+					//	ball.live();
+					/*	if (reflectorLines[i].intersectsLine(ballLines[j])){
+							ball.revert();
+							wallsHit(index);
+							ball.live();
+							ball.live();
+						}*/
+					last = i;
 				}
 			}
+			if(hit)k++;
+			hit = false;
 		}
-
+		if(k > 1) {
+			ball.setVelocityX(ball.getVelocityX()*-1);
+			ball.setVelocityY(ball.getVelocityY()*-1);
+			wallsHit(index);
+			//	System.out.println(k);
+		}
+		if(k == 1 && !(reflectors.get(index).getHitBall()) && last > -1){
+			calculateBounce(reflectorLines[last]);
+			wallsHit(index);
+		}
 	}
 
 	public void calculateBounce(Line2D reflectorLine) {
@@ -571,7 +595,7 @@ public class Game extends Canvas implements Runnable {
 			double slope = (y2 - y1) / (x2 - x1);
 			double recipSlope = -(x2 - x1) / (y2 - y1);
 			Line2D.Double tempLine = new Line2D.Double(clickPoint, cursorPoint);
-			System.out.println(getLength(tempLine));
+			//System.out.println(getLength(tempLine));
 			if (getLength(tempLine) > 200) {
 				endPoint = getNewPoint(slope, clickPoint, cursorPoint, 200);
 			}
